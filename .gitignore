@@ -1,0 +1,8 @@
+.terraform/
+*terraform.tfstate*
+tfplan
+*.raw
+*.qcow2
+*.gz
+talosconfig.yml
+kubeconfig.yml
