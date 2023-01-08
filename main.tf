@@ -63,7 +63,8 @@ variable "cluster_name" {
 }
 
 locals {
-  cluster_endpoint = "https://10.17.3.10:6443" # k8s api-server endpoint.
+  cluster_vip      = "10.17.3.9"
+  cluster_endpoint = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
   controller_nodes = [
     for i in range(var.controller_count) : {
       name    = "c${i}"
@@ -167,6 +168,20 @@ resource "talos_machine_configuration_controlplane" "controller" {
               disabled = true
             }
           }
+        }
+      }
+      machine = {
+        network = {
+          interfaces = [
+            # see https://www.talos.dev/v1.3/talos-guides/network/vip/
+            {
+              interface = "eth0"
+              dhcp      = true
+              vip = {
+                ip = local.cluster_vip
+              }
+            }
+          ]
         }
       }
     })
