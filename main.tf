@@ -63,6 +63,8 @@ variable "cluster_name" {
 }
 
 locals {
+  gateway          = "10.17.3.1"
+  nameservers      = [local.gateway]
   cluster_vip      = "10.17.3.9"
   cluster_endpoint = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
   controller_nodes = [
@@ -171,17 +173,25 @@ resource "talos_machine_configuration_controlplane" "controller" {
         }
       }
       machine = {
+        # see https://www.talos.dev/v1.3/reference/configuration/#networkconfig
+        # see https://www.talos.dev/v1.3/talos-guides/network/vip/
         network = {
           interfaces = [
-            # see https://www.talos.dev/v1.3/talos-guides/network/vip/
             {
               interface = "eth0"
-              dhcp      = true
+              dhcp      = false
+              routes = [
+                {
+                  network = "0.0.0.0/0"
+                  gateway = local.gateway
+                }
+              ]
               vip = {
                 ip = local.cluster_vip
               }
             }
           ]
+          nameservers = local.nameservers
         }
       }
     })
@@ -203,6 +213,24 @@ resource "talos_machine_configuration_worker" "worker" {
               disabled = true
             }
           }
+        }
+      }
+      machine = {
+        # see https://www.talos.dev/v1.3/reference/configuration/#networkconfig
+        network = {
+          interfaces = [
+            {
+              interface = "eth0"
+              dhcp      = false
+              routes = [
+                {
+                  network = "0.0.0.0/0"
+                  gateway = local.gateway
+                }
+              ]
+            }
+          ]
+          nameservers = local.nameservers
         }
       }
     })
@@ -227,8 +255,15 @@ resource "talos_machine_configuration_apply" "controller" {
         install = {
           disk = "/dev/sda"
         }
+        # see https://www.talos.dev/v1.3/reference/configuration/#networkconfig
         network = {
           hostname = each.value.name
+          interfaces = [
+            {
+              interface = "eth0"
+              addresses = ["${each.value.address}/24"]
+            }
+          ]
         }
       }
     }),
@@ -247,8 +282,15 @@ resource "talos_machine_configuration_apply" "worker" {
         install = {
           disk = "/dev/sda"
         }
+        # see https://www.talos.dev/v1.3/reference/configuration/#networkconfig
         network = {
           hostname = each.value.name
+          interfaces = [
+            {
+              interface = "eth0"
+              addresses = ["${each.value.address}/24"]
+            }
+          ]
         }
       }
     }),

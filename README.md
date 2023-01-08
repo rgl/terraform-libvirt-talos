@@ -82,6 +82,13 @@ kubectl cluster-info
 kubectl get nodes -o wide
 ```
 
+Reboot a node:
+
+```bash
+w0='10.17.3.20'
+talosctl -n $w0 reboot
+```
+
 Destroy the infrastructure:
 
 ```bash
