@@ -4,6 +4,22 @@ An example Talos Linux Kubernetes cluster in libvirt QEMU/KVM Virtual Machines u
 
 # Usage (Ubuntu 22.04 host)
 
+Install libvirt:
+
+```bash
+# install libvirt et al.
+apt-get install -y virt-manager
+# configure the security_driver to prevent errors alike (when using terraform):
+#   Could not open '/var/lib/libvirt/images/terraform_example_root.img': Permission denied'
+sed -i -E 's,#?(security_driver)\s*=.*,\1 = "none",g' /etc/libvirt/qemu.conf
+systemctl restart libvirtd
+# let the current user manage libvirtd.
+# see /usr/share/polkit-1/rules.d/60-libvirt.rules
+usermod -aG libvirt $USER
+# restart the shell.
+exit
+```
+
 Install Terraform:
 
 ```bash
