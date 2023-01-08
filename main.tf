@@ -62,13 +62,8 @@ variable "cluster_name" {
   default     = "example"
 }
 
-variable "cluster_endpoint" {
-  description = "The endpoint for the Talos cluster"
-  type        = string
-  default     = "https://10.17.3.10:6443"
-}
-
 locals {
+  cluster_endpoint = "https://10.17.3.10:6443" # k8s api-server endpoint.
   controller_nodes = [
     for i in range(var.controller_count) : {
       name    = "c${i}"
@@ -159,14 +154,44 @@ resource "talos_machine_secrets" "machine_secrets" {
 
 resource "talos_machine_configuration_controlplane" "controller" {
   cluster_name     = var.cluster_name
-  cluster_endpoint = var.cluster_endpoint
+  cluster_endpoint = local.cluster_endpoint
   machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
+  config_patches = [
+    yamlencode({
+      cluster = {
+        # see https://www.talos.dev/v1.3/talos-guides/discovery/
+        discovery = {
+          enabled = true
+          registries = {
+            service = {
+              disabled = true
+            }
+          }
+        }
+      }
+    })
+  ]
 }
 
 resource "talos_machine_configuration_worker" "worker" {
   cluster_name     = var.cluster_name
-  cluster_endpoint = var.cluster_endpoint
+  cluster_endpoint = local.cluster_endpoint
   machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
+  config_patches = [
+    yamlencode({
+      cluster = {
+        # see https://www.talos.dev/v1.3/talos-guides/discovery/
+        discovery = {
+          enabled = true
+          registries = {
+            service = {
+              disabled = true
+            }
+          }
+        }
+      }
+    })
+  ]
 }
 
 resource "talos_client_configuration" "talos" {
