@@ -52,7 +52,9 @@ Show talos information:
 ```bash
 terraform output -raw talosconfig >talosconfig.yml
 export TALOSCONFIG=$PWD/talosconfig.yml
-talosctl dashboard -n c0
+c0='10.17.3.10'
+talosctl -n $c0 version
+talosctl -n $c0 dashboard
 ```
 
 Show kubernetes information:
@@ -60,6 +62,7 @@ Show kubernetes information:
 ```bash
 terraform output -raw kubeconfig >kubeconfig.yml
 export KUBECONFIG=$PWD/kubeconfig.yml
+kubectl cluster-info
 kubectl get nodes -o wide
 ```
 
@@ -67,4 +70,48 @@ Destroy the infrastructure:
 
 ```bash
 time terraform destroy -auto-approve
+```
+
+# Troubleshoot
+
+Talos:
+
+```bash
+# see https://www.talos.dev/v1.2/advanced/troubleshooting-control-plane/
+talosctl -n $c0 service etcd status
+talosctl -n $c0 etcd members
+talosctl -n $c0 dashboard
+talosctl -n $c0 logs controller-runtime
+talosctl -n $c0 logs kubelet
+talosctl -n $c0 disks
+talosctl -n $c0 mounts | sort
+talosctl -n $c0 get resourcedefinitions
+talosctl -n $c0 get machineconfigs -o yaml
+talosctl -n $c0 get staticpods -o yaml
+talosctl -n $c0 get staticpodstatus
+talosctl -n $c0 get manifests
+talosctl -n $c0 get services
+talosctl -n $c0 get extensions
+talosctl -n $c0 get addresses
+talosctl -n $c0 get nodeaddresses
+talosctl -n $c0 list -l -r -t f /etc
+talosctl -n $c0 list -l -r -t f /system
+talosctl -n $c0 list -l -r -t f /var
+talosctl -n $c0 list -l /sys/fs/cgroup
+talosctl -n $c0 read /proc/cmdline | tr ' ' '\n'
+talosctl -n $c0 read /proc/mounts | sort
+talosctl -n $c0 read /etc/resolv.conf
+talosctl -n $c0 read /etc/containerd/config.toml
+talosctl -n $c0 read /etc/cri/containerd.toml
+talosctl -n $c0 read /etc/cri/conf.d/cri.toml
+talosctl -n $c0 ps
+talosctl -n $c0 containers -k
+```
+
+Kubernetes:
+
+```bash
+kubectl get events --all-namespaces --watch
+kubectl --namespace kube-system get events --watch
+kubectl run busybox -it --rm --restart=Never --image=busybox:1.36 -- nslookup -type=a talos.dev
 ```
