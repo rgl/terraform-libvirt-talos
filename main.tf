@@ -98,7 +98,7 @@ resource "libvirt_network" "talos" {
 resource "libvirt_volume" "controller" {
   count            = var.controller_count
   name             = "${var.prefix}_c${count.index}.img"
-  base_volume_name = "talos-1.3.1-amd64.qcow2"
+  base_volume_name = "talos-1.3.2-amd64.qcow2"
   format           = "qcow2"
   size             = 40 * 1024 * 1024 * 1024 # 40GiB.
 }
@@ -107,7 +107,7 @@ resource "libvirt_volume" "controller" {
 resource "libvirt_volume" "worker" {
   count            = var.worker_count
   name             = "${var.prefix}_w${count.index}.img"
-  base_volume_name = "talos-1.3.1-amd64.qcow2"
+  base_volume_name = "talos-1.3.2-amd64.qcow2"
   format           = "qcow2"
   size             = 40 * 1024 * 1024 * 1024 # 40GiB.
 }
