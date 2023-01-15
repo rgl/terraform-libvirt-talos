@@ -262,16 +262,6 @@ resource "talos_cluster_kubeconfig" "talos" {
   node         = local.controller_nodes[0].address
 }
 
-output "controller_machineconfig" {
-  value     = talos_machine_configuration_controlplane.controller.machine_config
-  sensitive = true
-}
-
-output "worker_machineconfig" {
-  value     = talos_machine_configuration_worker.worker.machine_config
-  sensitive = true
-}
-
 output "talosconfig" {
   value     = talos_client_configuration.talos.talos_config
   sensitive = true
