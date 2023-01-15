@@ -84,6 +84,9 @@ locals {
       discovery = {
         enabled = true
         registries = {
+          kubernetes = {
+            disabled = false
+          }
           service = {
             disabled = true
           }

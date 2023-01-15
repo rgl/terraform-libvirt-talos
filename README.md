@@ -96,6 +96,7 @@ Talos:
 # see https://www.talos.dev/v1.2/advanced/troubleshooting-control-plane/
 talosctl -n $c0 service etcd status
 talosctl -n $c0 etcd members
+talosctl -n $c0 get members
 talosctl -n $c0 dashboard
 talosctl -n $c0 logs controller-runtime
 talosctl -n $c0 logs kubelet
