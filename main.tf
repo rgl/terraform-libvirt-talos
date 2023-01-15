@@ -77,6 +77,20 @@ locals {
       address = "10.17.3.${20 + i}"
     }
   ]
+  common_machine_config = {
+    cluster = {
+      # see https://www.talos.dev/v1.3/talos-guides/discovery/
+      # see https://www.talos.dev/v1.3/reference/configuration/#clusterdiscoveryconfig
+      discovery = {
+        enabled = true
+        registries = {
+          service = {
+            disabled = true
+          }
+        }
+      }
+    }
+  }
 }
 
 # see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.7.1/website/docs/r/network.markdown
@@ -158,18 +172,8 @@ resource "talos_machine_configuration_controlplane" "controller" {
   cluster_endpoint = local.cluster_endpoint
   machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
   config_patches = [
+    yamlencode(local.common_machine_config),
     yamlencode({
-      cluster = {
-        # see https://www.talos.dev/v1.3/talos-guides/discovery/
-        discovery = {
-          enabled = true
-          registries = {
-            service = {
-              disabled = true
-            }
-          }
-        }
-      }
       machine = {
         network = {
           interfaces = [
@@ -193,19 +197,7 @@ resource "talos_machine_configuration_worker" "worker" {
   cluster_endpoint = local.cluster_endpoint
   machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
   config_patches = [
-    yamlencode({
-      cluster = {
-        # see https://www.talos.dev/v1.3/talos-guides/discovery/
-        discovery = {
-          enabled = true
-          registries = {
-            service = {
-              disabled = true
-            }
-          }
-        }
-      }
-    })
+    yamlencode(local.common_machine_config),
   ]
 }
 
