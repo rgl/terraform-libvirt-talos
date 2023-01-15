@@ -207,15 +207,15 @@ resource "talos_machine_configuration_worker" "worker" {
 resource "talos_client_configuration" "talos" {
   cluster_name    = var.cluster_name
   machine_secrets = talos_machine_secrets.machine_secrets.machine_secrets
-  endpoints       = [for n in local.controller_nodes : n.address]
+  endpoints       = [for node in local.controller_nodes : node.address]
 }
 
 resource "talos_machine_configuration_apply" "controller" {
+  count                 = var.controller_count
   talos_config          = talos_client_configuration.talos.talos_config
   machine_configuration = talos_machine_configuration_controlplane.controller.machine_config
-  for_each              = { for n in local.controller_nodes : n.name => n }
-  endpoint              = each.value.address
-  node                  = each.value.address
+  endpoint              = local.controller_nodes[count.index].address
+  node                  = local.controller_nodes[count.index].address
   config_patches = [
     yamlencode({
       machine = {
@@ -223,7 +223,7 @@ resource "talos_machine_configuration_apply" "controller" {
           disk = "/dev/sda"
         }
         network = {
-          hostname = each.value.name
+          hostname = local.controller_nodes[count.index].name
         }
       }
     }),
@@ -231,11 +231,11 @@ resource "talos_machine_configuration_apply" "controller" {
 }
 
 resource "talos_machine_configuration_apply" "worker" {
+  count                 = var.worker_count
   talos_config          = talos_client_configuration.talos.talos_config
   machine_configuration = talos_machine_configuration_worker.worker.machine_config
-  for_each              = { for n in local.worker_nodes : n.name => n }
-  endpoint              = each.value.address
-  node                  = each.value.address
+  endpoint              = local.worker_nodes[count.index].address
+  node                  = local.worker_nodes[count.index].address
   config_patches = [
     yamlencode({
       machine = {
@@ -243,7 +243,7 @@ resource "talos_machine_configuration_apply" "worker" {
           disk = "/dev/sda"
         }
         network = {
-          hostname = each.value.name
+          hostname = local.worker_nodes[count.index].name
         }
       }
     }),
