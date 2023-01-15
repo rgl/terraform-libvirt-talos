@@ -10,7 +10,7 @@ Install libvirt:
 # install libvirt et al.
 apt-get install -y virt-manager
 # configure the security_driver to prevent errors alike (when using terraform):
-#   Could not open '/var/lib/libvirt/images/terraform_example_root.img': Permission denied'
+#   Could not open '/var/lib/libvirt/images/terraform_talos_example_c0.img': Permission denied'
 sed -i -E 's,#?(security_driver)\s*=.*,\1 = "none",g' /etc/libvirt/qemu.conf
 systemctl restart libvirtd
 # let the current user manage libvirtd.
@@ -53,30 +53,33 @@ virsh vol-upload --pool default talos-$talos_version-amd64.qcow2 talos-$talos_ve
 rm -f disk.raw talos-$talos_version.qcow2 talos-$talos_version-metal-amd64.tar.gz
 ```
 
+Initialize terraform:
+
+```bash
+./do init
+```
+
 Create the infrastructure:
 
 ```bash
-terraform init
-terraform plan -out=tfplan
-time terraform apply tfplan
+time ./do plan-apply
 ```
-
-**NB** if you have errors alike `Could not open '/var/lib/libvirt/images/terraform_talos_example_c0.img': Permission denied'` you need to reconfigure libvirt by setting `security_driver = "none"` in `/etc/libvirt/qemu.conf` and restart libvirt with `sudo systemctl restart libvirtd`.
 
 Show talos information:
 
 ```bash
-terraform output -raw talosconfig >talosconfig.yml
 export TALOSCONFIG=$PWD/talosconfig.yml
-c0='10.17.3.10'
-talosctl -n $c0 version
-talosctl -n $c0 dashboard
+controllers="$(terraform output -raw controllers)"
+workers="$(terraform output -raw workers)"
+all="$controllers,$workers"
+c0="$(echo $controllers | cut -d , -f 1)"
+talosctl -n $all version
+talosctl -n $all dashboard
 ```
 
 Show kubernetes information:
 
 ```bash
-terraform output -raw kubeconfig >kubeconfig.yml
 export KUBECONFIG=$PWD/kubeconfig.yml
 kubectl cluster-info
 kubectl get nodes -o wide
@@ -97,6 +100,7 @@ Talos:
 talosctl -n $c0 service etcd status
 talosctl -n $c0 etcd members
 talosctl -n $c0 get members
+talosctl -n $c0 health --control-plane-nodes $controllers --worker-nodes $workers
 talosctl -n $c0 dashboard
 talosctl -n $c0 logs controller-runtime
 talosctl -n $c0 logs kubelet
@@ -121,6 +125,8 @@ talosctl -n $c0 read /etc/resolv.conf
 talosctl -n $c0 read /etc/containerd/config.toml
 talosctl -n $c0 read /etc/cri/containerd.toml
 talosctl -n $c0 read /etc/cri/conf.d/cri.toml
+talosctl -n $c0 read /etc/kubernetes/kubelet.yaml
+talosctl -n $c0 read /etc/kubernetes/bootstrap-kubeconfig
 talosctl -n $c0 ps
 talosctl -n $c0 containers -k
 ```

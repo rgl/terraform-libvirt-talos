@@ -40,7 +40,7 @@ variable "prefix" {
 
 variable "controller_count" {
   type    = number
-  default = 1
+  default = 3
   validation {
     condition     = var.controller_count >= 1
     error_message = "Must be 1 or more."
@@ -270,4 +270,12 @@ output "talosconfig" {
 output "kubeconfig" {
   value     = talos_cluster_kubeconfig.talos.kube_config
   sensitive = true
+}
+
+output "controllers" {
+  value = join(",", [for node in local.controller_nodes : node.address])
+}
+
+output "workers" {
+  value = join(",", [for node in local.worker_nodes : node.address])
 }
