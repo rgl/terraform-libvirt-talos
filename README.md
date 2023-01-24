@@ -32,7 +32,7 @@ rm terraform terraform_*_linux_amd64.zip
 Install talosctl:
 
 ```bash
-talos_version='1.3.2'
+talos_version='1.3.3'
 wget https://github.com/siderolabs/talos/releases/download/v$talos_version/talosctl-linux-amd64
 sudo install talosctl-linux-amd64 /usr/local/bin/talosctl
 rm talosctl-linux-amd64
@@ -41,7 +41,7 @@ rm talosctl-linux-amd64
 Install the talos image into libvirt:
 
 ```bash
-talos_version='1.3.2'
+talos_version='1.3.3'
 wget \
   -O talos-$talos_version-metal-amd64.tar.gz \
   https://github.com/siderolabs/talos/releases/download/v$talos_version/metal-amd64.tar.gz
@@ -88,7 +88,7 @@ kubectl get nodes -o wide
 Destroy the infrastructure:
 
 ```bash
-time terraform destroy -auto-approve
+time ./do destroy
 ```
 
 # Troubleshoot
@@ -96,7 +96,7 @@ time terraform destroy -auto-approve
 Talos:
 
 ```bash
-# see https://www.talos.dev/v1.2/advanced/troubleshooting-control-plane/
+# see https://www.talos.dev/v1.3/advanced/troubleshooting-control-plane/
 talosctl -n $c0 service etcd status
 talosctl -n $c0 etcd members
 talosctl -n $c0 get members
