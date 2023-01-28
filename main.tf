@@ -146,6 +146,11 @@ resource "libvirt_domain" "controller" {
     network_id = libvirt_network.talos.id
     addresses  = [local.controller_nodes[count.index].address]
   }
+  lifecycle {
+    ignore_changes = [
+      disk[0].wwn,
+    ]
+  }
 }
 
 # see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.7.1/website/docs/r/domain.html.markdown
@@ -164,6 +169,11 @@ resource "libvirt_domain" "worker" {
   network_interface {
     network_id = libvirt_network.talos.id
     addresses  = [local.worker_nodes[count.index].address]
+  }
+  lifecycle {
+    ignore_changes = [
+      disk[0].wwn,
+    ]
   }
 }
 
