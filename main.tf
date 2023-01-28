@@ -63,8 +63,10 @@ variable "cluster_name" {
 }
 
 locals {
-  cluster_vip      = "10.17.3.9"
-  cluster_endpoint = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
+  talos_version      = "1.3.3"
+  kubernetes_version = "1.26.1"
+  cluster_vip        = "10.17.3.9"
+  cluster_endpoint   = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
   controller_nodes = [
     for i in range(var.controller_count) : {
       name    = "c${i}"
@@ -115,7 +117,7 @@ resource "libvirt_network" "talos" {
 resource "libvirt_volume" "controller" {
   count            = var.controller_count
   name             = "${var.prefix}_c${count.index}.img"
-  base_volume_name = "talos-1.3.3-amd64.qcow2"
+  base_volume_name = "talos-${local.talos_version}-amd64.qcow2"
   format           = "qcow2"
   size             = 40 * 1024 * 1024 * 1024 # 40GiB.
 }
@@ -124,7 +126,7 @@ resource "libvirt_volume" "controller" {
 resource "libvirt_volume" "worker" {
   count            = var.worker_count
   name             = "${var.prefix}_w${count.index}.img"
-  base_volume_name = "talos-1.3.3-amd64.qcow2"
+  base_volume_name = "talos-${local.talos_version}-amd64.qcow2"
   format           = "qcow2"
   size             = 40 * 1024 * 1024 * 1024 # 40GiB.
 }
@@ -183,9 +185,10 @@ resource "talos_machine_secrets" "machine_secrets" {
 
 // see https://registry.terraform.io/providers/siderolabs/talos/0.1.0/docs/resources/machine_configuration_controlplane
 resource "talos_machine_configuration_controlplane" "controller" {
-  cluster_name     = var.cluster_name
-  cluster_endpoint = local.cluster_endpoint
-  machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
+  cluster_name       = var.cluster_name
+  cluster_endpoint   = local.cluster_endpoint
+  machine_secrets    = talos_machine_secrets.machine_secrets.machine_secrets
+  kubernetes_version = local.kubernetes_version
   config_patches = [
     yamlencode(local.common_machine_config),
     yamlencode({
@@ -209,9 +212,10 @@ resource "talos_machine_configuration_controlplane" "controller" {
 
 // see https://registry.terraform.io/providers/siderolabs/talos/0.1.0/docs/resources/machine_configuration_worker
 resource "talos_machine_configuration_worker" "worker" {
-  cluster_name     = var.cluster_name
-  cluster_endpoint = local.cluster_endpoint
-  machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
+  cluster_name       = var.cluster_name
+  cluster_endpoint   = local.cluster_endpoint
+  machine_secrets    = talos_machine_secrets.machine_secrets.machine_secrets
+  kubernetes_version = local.kubernetes_version
   config_patches = [
     yamlencode(local.common_machine_config),
   ]
