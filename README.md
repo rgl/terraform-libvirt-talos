@@ -23,8 +23,8 @@ exit
 Install Terraform:
 
 ```bash
-wget https://releases.hashicorp.com/terraform/1.3.7/terraform_1.3.7_linux_amd64.zip
-unzip terraform_1.3.7_linux_amd64.zip
+wget https://releases.hashicorp.com/terraform/1.3.8/terraform_1.3.8_linux_amd64.zip
+unzip terraform_1.3.8_linux_amd64.zip
 sudo install terraform /usr/local/bin
 rm terraform terraform_*_linux_amd64.zip
 ```
