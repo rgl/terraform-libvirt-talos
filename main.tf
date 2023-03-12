@@ -63,7 +63,7 @@ variable "cluster_name" {
 }
 
 locals {
-  talos_version      = "1.3.5"
+  talos_version      = "1.4.0-alpha.2"
   kubernetes_version = "1.26.2"
   cluster_vip        = "10.17.3.9"
   cluster_endpoint   = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
@@ -80,9 +80,16 @@ locals {
     }
   ]
   common_machine_config = {
+    machine = {
+      install = {
+        extraKernelArgs = [
+          "talos.dashboard.disabled=1",
+        ]
+      }
+    }
     cluster = {
-      # see https://www.talos.dev/v1.3/talos-guides/discovery/
-      # see https://www.talos.dev/v1.3/reference/configuration/#clusterdiscoveryconfig
+      # see https://www.talos.dev/v1.4/talos-guides/discovery/
+      # see https://www.talos.dev/v1.4/reference/configuration/#clusterdiscoveryconfig
       discovery = {
         enabled = true
         registries = {
@@ -195,7 +202,7 @@ resource "talos_machine_configuration_controlplane" "controller" {
       machine = {
         network = {
           interfaces = [
-            # see https://www.talos.dev/v1.3/talos-guides/network/vip/
+            # see https://www.talos.dev/v1.4/talos-guides/network/vip/
             {
               interface = "eth0"
               dhcp      = true
