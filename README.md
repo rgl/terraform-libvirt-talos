@@ -32,7 +32,7 @@ rm terraform terraform_*_linux_amd64.zip
 Install talosctl:
 
 ```bash
-talos_version='1.3.5'
+talos_version='1.3.6'
 wget https://github.com/siderolabs/talos/releases/download/v$talos_version/talosctl-linux-amd64
 sudo install talosctl-linux-amd64 /usr/local/bin/talosctl
 rm talosctl-linux-amd64
@@ -41,7 +41,7 @@ rm talosctl-linux-amd64
 Install the talos image into libvirt:
 
 ```bash
-talos_version='1.3.5'
+talos_version='1.3.6'
 wget \
   -O talos-$talos_version-metal-amd64.tar.gz \
   https://github.com/siderolabs/talos/releases/download/v$talos_version/metal-amd64.tar.gz
