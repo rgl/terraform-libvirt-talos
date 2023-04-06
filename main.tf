@@ -63,7 +63,7 @@ variable "cluster_name" {
 }
 
 locals {
-  talos_version      = "1.3.6"
+  talos_version      = "1.3.7"
   kubernetes_version = "1.26.3"
   cluster_vip        = "10.17.3.9"
   cluster_endpoint   = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
