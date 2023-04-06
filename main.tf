@@ -133,13 +133,18 @@ resource "libvirt_volume" "worker" {
 
 # see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.7.1/website/docs/r/domain.html.markdown
 resource "libvirt_domain" "controller" {
-  count = var.controller_count
-  name  = "${var.prefix}_${local.controller_nodes[count.index].name}"
+  count    = var.controller_count
+  name     = "${var.prefix}_${local.controller_nodes[count.index].name}"
+  machine  = "q35"
+  firmware = "/usr/share/OVMF/OVMF_CODE.fd"
   cpu {
     mode = "host-passthrough"
   }
   vcpu   = 4
   memory = 2 * 1024
+  video {
+    type = "qxl"
+  }
   disk {
     volume_id = libvirt_volume.controller[count.index].id
     scsi      = true
@@ -157,13 +162,18 @@ resource "libvirt_domain" "controller" {
 
 # see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.7.1/website/docs/r/domain.html.markdown
 resource "libvirt_domain" "worker" {
-  count = var.worker_count
-  name  = "${var.prefix}_${local.worker_nodes[count.index].name}"
+  count    = var.worker_count
+  name     = "${var.prefix}_${local.worker_nodes[count.index].name}"
+  machine  = "q35"
+  firmware = "/usr/share/OVMF/OVMF_CODE.fd"
   cpu {
     mode = "host-passthrough"
   }
   vcpu   = 4
   memory = 2 * 1024
+  video {
+    type = "qxl"
+  }
   disk {
     volume_id = libvirt_volume.worker[count.index].id
     scsi      = true
