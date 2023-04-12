@@ -133,10 +133,9 @@ resource "libvirt_volume" "worker" {
 
 # see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.7.1/website/docs/r/domain.html.markdown
 resource "libvirt_domain" "controller" {
-  count    = var.controller_count
-  name     = "${var.prefix}_${local.controller_nodes[count.index].name}"
-  machine  = "q35"
-  firmware = "/usr/share/OVMF/OVMF_CODE.fd"
+  count   = var.controller_count
+  name    = "${var.prefix}_${local.controller_nodes[count.index].name}"
+  machine = "q35"
   cpu {
     mode = "host-passthrough"
   }
@@ -162,10 +161,9 @@ resource "libvirt_domain" "controller" {
 
 # see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.7.1/website/docs/r/domain.html.markdown
 resource "libvirt_domain" "worker" {
-  count    = var.worker_count
-  name     = "${var.prefix}_${local.worker_nodes[count.index].name}"
-  machine  = "q35"
-  firmware = "/usr/share/OVMF/OVMF_CODE.fd"
+  count   = var.worker_count
+  name    = "${var.prefix}_${local.worker_nodes[count.index].name}"
+  machine = "q35"
   cpu {
     mode = "host-passthrough"
   }
