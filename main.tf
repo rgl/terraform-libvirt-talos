@@ -22,7 +22,7 @@ terraform {
     # see https://github.com/siderolabs/terraform-provider-talos
     talos = {
       source  = "siderolabs/talos"
-      version = "0.1.2"
+      version = "0.2.0"
     }
   }
 }
@@ -63,8 +63,9 @@ variable "cluster_name" {
 }
 
 locals {
-  talos_version      = "1.4.0"
   kubernetes_version = "1.26.3"
+  talos_version      = "1.4.0"
+  talos_version_tag  = "v${local.talos_version}"
   cluster_vip        = "10.17.3.9"
   cluster_endpoint   = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
   controller_nodes = [
@@ -187,15 +188,13 @@ resource "libvirt_domain" "worker" {
   }
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.1.2/docs/resources/machine_secrets
-resource "talos_machine_secrets" "machine_secrets" {
-}
-
-// see https://registry.terraform.io/providers/siderolabs/talos/0.1.2/docs/resources/machine_configuration_controlplane
-resource "talos_machine_configuration_controlplane" "controller" {
+// see https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/data-sources/machine_configuration
+data "talos_machine_configuration" "controller" {
   cluster_name       = var.cluster_name
   cluster_endpoint   = local.cluster_endpoint
-  machine_secrets    = talos_machine_secrets.machine_secrets.machine_secrets
+  machine_secrets    = talos_machine_secrets.talos.machine_secrets
+  machine_type       = "controlplane"
+  talos_version      = local.talos_version_tag
   kubernetes_version = local.kubernetes_version
   config_patches = [
     yamlencode(local.common_machine_config),
@@ -218,31 +217,47 @@ resource "talos_machine_configuration_controlplane" "controller" {
   ]
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.1.2/docs/resources/machine_configuration_worker
-resource "talos_machine_configuration_worker" "worker" {
+// see https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/data-sources/machine_configuration
+data "talos_machine_configuration" "worker" {
   cluster_name       = var.cluster_name
   cluster_endpoint   = local.cluster_endpoint
-  machine_secrets    = talos_machine_secrets.machine_secrets.machine_secrets
+  machine_secrets    = talos_machine_secrets.talos.machine_secrets
+  machine_type       = "worker"
+  talos_version      = local.talos_version_tag
   kubernetes_version = local.kubernetes_version
   config_patches = [
     yamlencode(local.common_machine_config),
   ]
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.1.2/docs/resources/client_configuration
-resource "talos_client_configuration" "talos" {
-  cluster_name    = var.cluster_name
-  machine_secrets = talos_machine_secrets.machine_secrets.machine_secrets
-  endpoints       = [for node in local.controller_nodes : node.address]
+// see https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/data-sources/client_configuration
+data "talos_client_configuration" "talos" {
+  cluster_name         = var.cluster_name
+  client_configuration = talos_machine_secrets.talos.client_configuration
+  endpoints            = [for node in local.controller_nodes : node.address]
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.1.2/docs/resources/machine_configuration_apply
+// see https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/data-sources/cluster_kubeconfig
+data "talos_cluster_kubeconfig" "talos" {
+  client_configuration = talos_machine_secrets.talos.client_configuration
+  endpoint             = local.controller_nodes[0].address
+  node                 = local.controller_nodes[0].address
+  depends_on = [
+    talos_machine_bootstrap.talos,
+  ]
+}
+
+// see https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/resources/machine_secrets
+resource "talos_machine_secrets" "talos" {
+}
+
+// see https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/resources/machine_configuration_apply
 resource "talos_machine_configuration_apply" "controller" {
-  count                 = var.controller_count
-  talos_config          = talos_client_configuration.talos.talos_config
-  machine_configuration = talos_machine_configuration_controlplane.controller.machine_config
-  endpoint              = local.controller_nodes[count.index].address
-  node                  = local.controller_nodes[count.index].address
+  count                       = var.controller_count
+  client_configuration        = talos_machine_secrets.talos.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.controller.machine_configuration
+  endpoint                    = local.controller_nodes[count.index].address
+  node                        = local.controller_nodes[count.index].address
   config_patches = [
     yamlencode({
       machine = {
@@ -255,15 +270,18 @@ resource "talos_machine_configuration_apply" "controller" {
       }
     }),
   ]
+  depends_on = [
+    libvirt_domain.controller,
+  ]
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.1.2/docs/resources/machine_configuration_apply
+// see https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/resources/machine_configuration_apply
 resource "talos_machine_configuration_apply" "worker" {
-  count                 = var.worker_count
-  talos_config          = talos_client_configuration.talos.talos_config
-  machine_configuration = talos_machine_configuration_worker.worker.machine_config
-  endpoint              = local.worker_nodes[count.index].address
-  node                  = local.worker_nodes[count.index].address
+  count                       = var.worker_count
+  client_configuration        = talos_machine_secrets.talos.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.worker.machine_configuration
+  endpoint                    = local.worker_nodes[count.index].address
+  node                        = local.worker_nodes[count.index].address
   config_patches = [
     yamlencode({
       machine = {
@@ -276,29 +294,28 @@ resource "talos_machine_configuration_apply" "worker" {
       }
     }),
   ]
+  depends_on = [
+    libvirt_domain.worker,
+  ]
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.1.2/docs/resources/machine_bootstrap
+// see https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/resources/machine_bootstrap
 resource "talos_machine_bootstrap" "talos" {
-  talos_config = talos_client_configuration.talos.talos_config
-  endpoint     = local.controller_nodes[0].address
-  node         = local.controller_nodes[0].address
-}
-
-// see https://registry.terraform.io/providers/siderolabs/talos/0.1.2/docs/resources/cluster_kubeconfig
-resource "talos_cluster_kubeconfig" "talos" {
-  talos_config = talos_client_configuration.talos.talos_config
-  endpoint     = local.controller_nodes[0].address
-  node         = local.controller_nodes[0].address
+  client_configuration = talos_machine_secrets.talos.client_configuration
+  endpoint             = local.controller_nodes[0].address
+  node                 = local.controller_nodes[0].address
+  depends_on = [
+    talos_machine_configuration_apply.controller,
+  ]
 }
 
 output "talosconfig" {
-  value     = talos_client_configuration.talos.talos_config
+  value     = data.talos_client_configuration.talos.talos_config
   sensitive = true
 }
 
 output "kubeconfig" {
-  value     = talos_cluster_kubeconfig.talos.kube_config
+  value     = data.talos_cluster_kubeconfig.talos.kubeconfig_raw
   sensitive = true
 }
 
