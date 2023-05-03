@@ -196,6 +196,8 @@ data "talos_machine_configuration" "controller" {
   machine_type       = "controlplane"
   talos_version      = local.talos_version_tag
   kubernetes_version = local.kubernetes_version
+  examples           = false
+  docs               = false
   config_patches = [
     yamlencode(local.common_machine_config),
     yamlencode({
@@ -225,6 +227,8 @@ data "talos_machine_configuration" "worker" {
   machine_type       = "worker"
   talos_version      = local.talos_version_tag
   kubernetes_version = local.kubernetes_version
+  examples           = false
+  docs               = false
   config_patches = [
     yamlencode(local.common_machine_config),
   ]
