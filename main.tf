@@ -63,7 +63,7 @@ variable "cluster_name" {
 }
 
 locals {
-  kubernetes_version = "1.26.5" # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
+  kubernetes_version = "1.26.6" # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
   talos_version      = "1.4.5"  # see https://github.com/siderolabs/talos/releases
   talos_version_tag  = "v${local.talos_version}"
   cluster_vip        = "10.17.3.9"
