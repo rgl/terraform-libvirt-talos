@@ -32,7 +32,7 @@ rm terraform terraform_*_linux_amd64.zip
 Install talosctl:
 
 ```bash
-talos_version='1.4.7'
+talos_version='1.5.0'
 wget https://github.com/siderolabs/talos/releases/download/v$talos_version/talosctl-linux-amd64
 sudo install talosctl-linux-amd64 /usr/local/bin/talosctl
 rm talosctl-linux-amd64
@@ -41,17 +41,19 @@ rm talosctl-linux-amd64
 Install the talos image into libvirt:
 
 ```bash
-talos_version='1.4.7'
+talos_version='1.5.0'
 wget \
-  -O talos-$talos_version-metal-amd64.tar.gz \
-  https://github.com/siderolabs/talos/releases/download/v$talos_version/metal-amd64.tar.gz
-tar xf talos-$talos_version-metal-amd64.tar.gz
-qemu-img convert -O qcow2 disk.raw talos-$talos_version.qcow2
+  -O talos-$talos_version-nocloud-amd64.raw.xz \
+  https://github.com/siderolabs/talos/releases/download/v$talos_version/nocloud-amd64.raw.xz
+unxz talos-$talos_version-nocloud-amd64.raw.xz
+qemu-img convert -O qcow2 talos-$talos_version-nocloud-amd64.raw talos-$talos_version.qcow2
 qemu-img info talos-$talos_version.qcow2
 virsh vol-create-as default talos-$talos_version-amd64.qcow2 1G
 virsh vol-upload --pool default talos-$talos_version-amd64.qcow2 talos-$talos_version.qcow2
-rm -f disk.raw talos-$talos_version.qcow2 talos-$talos_version-metal-amd64.tar.gz
+rm -f talos-$talos_version-nocloud-amd64.raw talos-$talos_version.qcow2
 ```
+
+**NB** To create a customized image (e.g. with different kernel arguments), see the [Boot Assets: Creating customized Talos boot assets, disk images, ISO and installer images](https://www.talos.dev/v1.5/talos-guides/install/boot-assets/) page.
 
 Initialize terraform:
 
@@ -96,7 +98,7 @@ time ./do destroy
 Talos:
 
 ```bash
-# see https://www.talos.dev/v1.4/advanced/troubleshooting-control-plane/
+# see https://www.talos.dev/v1.5/advanced/troubleshooting-control-plane/
 talosctl -n $c0 service etcd status
 talosctl -n $c0 etcd status
 talosctl -n $c0 etcd alarm list

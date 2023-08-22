@@ -63,8 +63,8 @@ variable "cluster_name" {
 }
 
 locals {
-  kubernetes_version = "1.26.7" # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
-  talos_version      = "1.4.7"  # see https://github.com/siderolabs/talos/releases
+  kubernetes_version = "1.27.4" # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
+  talos_version      = "1.5.0"  # see https://github.com/siderolabs/talos/releases
   talos_version_tag  = "v${local.talos_version}"
   cluster_vip        = "10.17.3.9"
   cluster_endpoint   = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
@@ -82,8 +82,8 @@ locals {
   ]
   common_machine_config = {
     cluster = {
-      # see https://www.talos.dev/v1.4/talos-guides/discovery/
-      # see https://www.talos.dev/v1.4/reference/configuration/#clusterdiscoveryconfig
+      # see https://www.talos.dev/v1.5/talos-guides/discovery/
+      # see https://www.talos.dev/v1.5/reference/configuration/#clusterdiscoveryconfig
       discovery = {
         enabled = true
         registries = {
@@ -204,7 +204,7 @@ data "talos_machine_configuration" "controller" {
       machine = {
         network = {
           interfaces = [
-            # see https://www.talos.dev/v1.4/talos-guides/network/vip/
+            # see https://www.talos.dev/v1.5/talos-guides/network/vip/
             {
               interface = "eth0"
               dhcp      = true
