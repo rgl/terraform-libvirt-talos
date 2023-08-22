@@ -64,7 +64,7 @@ variable "cluster_name" {
 
 locals {
   kubernetes_version = "1.27.4" # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
-  talos_version      = "1.5.0"  # see https://github.com/siderolabs/talos/releases
+  talos_version      = "1.5.1"  # see https://github.com/siderolabs/talos/releases
   talos_version_tag  = "v${local.talos_version}"
   cluster_vip        = "10.17.3.9"
   cluster_endpoint   = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
