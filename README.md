@@ -99,6 +99,7 @@ Talos:
 
 ```bash
 # see https://www.talos.dev/v1.5/advanced/troubleshooting-control-plane/
+talosctl -n $c0 service ext-qemu-guest-agent status
 talosctl -n $c0 service etcd status
 talosctl -n $c0 etcd status
 talosctl -n $c0 etcd alarm list
@@ -122,6 +123,7 @@ talosctl -n $c0 get nodeaddresses
 talosctl -n $c0 list -l -r -t f /etc
 talosctl -n $c0 list -l -r -t f /system
 talosctl -n $c0 list -l -r -t f /var
+talosctl -n $c0 list -l -r /dev
 talosctl -n $c0 list -l /sys/fs/cgroup
 talosctl -n $c0 read /proc/cmdline | tr ' ' '\n'
 talosctl -n $c0 read /proc/mounts | sort

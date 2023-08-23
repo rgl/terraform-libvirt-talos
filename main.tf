@@ -63,11 +63,12 @@ variable "cluster_name" {
 }
 
 locals {
-  kubernetes_version = "1.26.7" # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
-  talos_version      = "1.5.1"  # see https://github.com/siderolabs/talos/releases
-  talos_version_tag  = "v${local.talos_version}"
-  cluster_vip        = "10.17.3.9"
-  cluster_endpoint   = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
+  qemu_guest_agent_extension_version = "8.0.2"  # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
+  kubernetes_version                 = "1.26.7" # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
+  talos_version                      = "1.5.1"  # see https://github.com/siderolabs/talos/releases
+  talos_version_tag                  = "v${local.talos_version}"
+  cluster_vip                        = "10.17.3.9"
+  cluster_endpoint                   = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
   controller_nodes = [
     for i in range(var.controller_count) : {
       name    = "c${i}"
@@ -81,6 +82,22 @@ locals {
     }
   ]
   common_machine_config = {
+    machine = {
+      # NB these changes will only be applied after a talos upgrade, which we
+      #    do in the "do" script.
+      #    NB this is needed because we are using the upstream nocloud image,
+      #       which already has talos installed.
+      #    TODO stop using the .machine.install configuration and generate an
+      #         image with this already baked in; then use that image as the
+      #         VM image.
+      install = {
+        extensions = [
+          {
+            image = "ghcr.io/siderolabs/qemu-guest-agent:${local.qemu_guest_agent_extension_version}"
+          },
+        ]
+      }
+    }
     cluster = {
       # see https://www.talos.dev/v1.5/talos-guides/discovery/
       # see https://www.talos.dev/v1.5/reference/configuration/#clusterdiscoveryconfig
@@ -134,9 +151,10 @@ resource "libvirt_volume" "worker" {
 
 # see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.7.1/website/docs/r/domain.html.markdown
 resource "libvirt_domain" "controller" {
-  count   = var.controller_count
-  name    = "${var.prefix}_${local.controller_nodes[count.index].name}"
-  machine = "q35"
+  count      = var.controller_count
+  name       = "${var.prefix}_${local.controller_nodes[count.index].name}"
+  qemu_agent = true
+  machine    = "q35"
   cpu {
     mode = "host-passthrough"
   }
@@ -162,9 +180,10 @@ resource "libvirt_domain" "controller" {
 
 # see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.7.1/website/docs/r/domain.html.markdown
 resource "libvirt_domain" "worker" {
-  count   = var.worker_count
-  name    = "${var.prefix}_${local.worker_nodes[count.index].name}"
-  machine = "q35"
+  count      = var.worker_count
+  name       = "${var.prefix}_${local.worker_nodes[count.index].name}"
+  qemu_agent = true
+  machine    = "q35"
   cpu {
     mode = "host-passthrough"
   }
@@ -265,9 +284,6 @@ resource "talos_machine_configuration_apply" "controller" {
   config_patches = [
     yamlencode({
       machine = {
-        install = {
-          disk = "/dev/sda"
-        }
         network = {
           hostname = local.controller_nodes[count.index].name
         }
@@ -289,9 +305,6 @@ resource "talos_machine_configuration_apply" "worker" {
   config_patches = [
     yamlencode({
       machine = {
-        install = {
-          disk = "/dev/sda"
-        }
         network = {
           hostname = local.worker_nodes[count.index].name
         }

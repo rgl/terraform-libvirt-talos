@@ -37,6 +37,15 @@ function health {
     --worker-nodes $workers
 }
 
+function upgrade {
+  step 'talosctl upgrade'
+  local controllers=($(terraform output -raw controllers | tr ',' ' '))
+  local workers=($(terraform output -raw workers | tr ',' ' '))
+  for n in "${controllers[@]}" "${workers[@]}"; do
+    talosctl -e $n -n $n upgrade --preserve --wait
+  done
+}
+
 function destroy {
   terraform destroy -auto-approve
 }
@@ -54,6 +63,7 @@ case $1 in
   plan-apply)
     plan
     apply
+    upgrade
     ;;
   health)
     health
