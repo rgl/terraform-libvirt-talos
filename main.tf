@@ -64,7 +64,7 @@ variable "cluster_name" {
 
 locals {
   qemu_guest_agent_extension_version = "8.0.2"  # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
-  kubernetes_version                 = "1.26.7" # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
+  kubernetes_version                 = "1.26.8" # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
   talos_version                      = "1.5.1"  # see https://github.com/siderolabs/talos/releases
   talos_version_tag                  = "v${local.talos_version}"
   cluster_vip                        = "10.17.3.9"
