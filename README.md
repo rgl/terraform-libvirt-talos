@@ -1,5 +1,7 @@
 # About
 
+[![Lint](https://github.com/rgl/terraform-libvirt-talos/actions/workflows/lint.yml/badge.svg)](https://github.com/rgl/terraform-libvirt-talos/actions/workflows/lint.yml)
+
 An example Talos Linux Kubernetes cluster in libvirt QEMU/KVM Virtual Machines using terraform.
 
 # Usage (Ubuntu 22.04 host)

@@ -1,0 +1,32 @@
+name: Lint
+on: [push]
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache the plugins directory
+        uses: actions/cache@v3
+        with:
+          path: ~/.tflint.d/plugins
+          key: tflint-${{ hashFiles('.tflint.hcl') }}
+      - uses: terraform-linters/setup-tflint@v3
+        name: Setup
+        with:
+          # see https://github.com/terraform-linters/tflint/releases
+          tflint_version: v0.48.0
+      - name: Init
+        run: tflint --init
+        env:
+          # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Lint
+        run: tflint --format compact
+  fmt:
+    name: terraform fmt check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: terraform fmt check
+        run: terraform fmt -check -diff
