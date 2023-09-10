@@ -35,6 +35,7 @@ provider "talos" {
 }
 
 variable "prefix" {
+  type    = string
   default = "terraform_talos_example"
 }
 
