@@ -108,6 +108,7 @@ talosctl -n $c0 etcd alarm list
 talosctl -n $c0 etcd members
 talosctl -n $c0 get members
 talosctl -n $c0 health --control-plane-nodes $controllers --worker-nodes $workers
+talosctl -n $c0 inspect dependencies | dot -Tsvg >c0.svg && xdg-open c0.svg
 talosctl -n $c0 dashboard
 talosctl -n $c0 logs controller-runtime
 talosctl -n $c0 logs kubelet
@@ -129,6 +130,7 @@ talosctl -n $c0 list -l -r /dev
 talosctl -n $c0 list -l /sys/fs/cgroup
 talosctl -n $c0 read /proc/cmdline | tr ' ' '\n'
 talosctl -n $c0 read /proc/mounts | sort
+talosctl -n $c0 read /etc/os-release
 talosctl -n $c0 read /etc/resolv.conf
 talosctl -n $c0 read /etc/containerd/config.toml
 talosctl -n $c0 read /etc/cri/containerd.toml

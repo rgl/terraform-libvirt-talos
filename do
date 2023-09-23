@@ -35,6 +35,26 @@ function health {
     health \
     --control-plane-nodes $controllers \
     --worker-nodes $workers
+  info
+}
+
+function info {
+  local controllers="$(terraform output -raw controllers)"
+  local workers="$(terraform output -raw workers)"
+  local nodes=($(echo "$controllers,$workers" | tr ',' ' '))
+  step 'talos node installer image'
+  for n in "${nodes[@]}"; do
+    # NB there can be multiple machineconfigs in a machine. we only want to see
+    #    the ones with an id that looks like a version tag.
+    talosctl -n $n get machineconfigs -o json \
+      | jq -r 'select(.metadata.id | test("v\\d+")) | .spec.machine.install.image' \
+      | sed -E "s,(.+),$n: \1,g"
+  done
+  step 'talos node os-release'
+  for n in "${nodes[@]}"; do
+    talosctl -n $n read /etc/os-release \
+      | sed -E "s,(.+),$n: \1,g"
+  done
 }
 
 function upgrade {
@@ -44,6 +64,7 @@ function upgrade {
   for n in "${controllers[@]}" "${workers[@]}"; do
     talosctl -e $n -n $n upgrade --preserve --wait
   done
+  health
 }
 
 function destroy {
@@ -68,11 +89,14 @@ case $1 in
   health)
     health
     ;;
+  info)
+    info
+    ;;
   destroy)
     destroy
     ;;
   *)
-    echo $"Usage: $0 {init|plan|apply|plan-apply|health}"
+    echo $"Usage: $0 {init|plan|apply|plan-apply|health|info}"
     exit 1
     ;;
 esac
