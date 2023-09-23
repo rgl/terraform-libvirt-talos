@@ -101,6 +101,7 @@ Talos:
 
 ```bash
 # see https://www.talos.dev/v1.5/advanced/troubleshooting-control-plane/
+talosctl -n $all support && rm -rf support && 7z x -osupport support.zip && code support
 talosctl -n $c0 service ext-qemu-guest-agent status
 talosctl -n $c0 service etcd status
 talosctl -n $c0 etcd status
