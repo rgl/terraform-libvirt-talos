@@ -124,6 +124,7 @@ talosctl -n $c0 get services
 talosctl -n $c0 get extensions
 talosctl -n $c0 get addresses
 talosctl -n $c0 get nodeaddresses
+talosctl -n $c0 netstat --extend --programs --pods --listening
 talosctl -n $c0 list -l -r -t f /etc
 talosctl -n $c0 list -l -r -t f /system
 talosctl -n $c0 list -l -r -t f /var
@@ -137,6 +138,7 @@ talosctl -n $c0 read /etc/containerd/config.toml
 talosctl -n $c0 read /etc/cri/containerd.toml
 talosctl -n $c0 read /etc/cri/conf.d/cri.toml
 talosctl -n $c0 read /etc/kubernetes/kubelet.yaml
+talosctl -n $c0 read /etc/kubernetes/kubeconfig-kubelet
 talosctl -n $c0 read /etc/kubernetes/bootstrap-kubeconfig
 talosctl -n $c0 ps
 talosctl -n $c0 containers -k

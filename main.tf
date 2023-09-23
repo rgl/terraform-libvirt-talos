@@ -98,6 +98,16 @@ locals {
           },
         ]
       }
+      features = {
+        # see https://www.talos.dev/v1.5/kubernetes-guides/configuration/kubeprism/
+        # see talosctl -n $c0 read /etc/kubernetes/kubeconfig-kubelet | yq .clusters[].cluster.server
+        # NB if you use a non-default CNI, you must configure it to use the
+        #    https://localhost:7445 kube-apiserver endpoint.
+        kubePrism = {
+          enabled = true
+          port    = 7445
+        }
+      }
     }
     cluster = {
       # see https://www.talos.dev/v1.5/talos-guides/discovery/
