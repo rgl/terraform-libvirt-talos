@@ -34,6 +34,22 @@ provider "libvirt" {
 provider "talos" {
 }
 
+variable "talos_version" {
+  type = string
+  validation {
+    condition     = can(regex("^\\d+(\\.\\d+)+", var.talos_version))
+    error_message = "Must be a version number."
+  }
+}
+
+variable "talos_version_tag" {
+  type = string
+  validation {
+    condition     = can(regex("^v\\d+(\\.\\d+)+", var.talos_version_tag))
+    error_message = "Must be a version tag."
+  }
+}
+
 variable "prefix" {
   type    = string
   default = "terraform_talos_example"
@@ -66,8 +82,8 @@ variable "cluster_name" {
 locals {
   qemu_guest_agent_extension_version = "8.1.0"  # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
   kubernetes_version                 = "1.26.9" # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
-  talos_version                      = "1.5.3"  # see https://github.com/siderolabs/talos/releases
-  talos_version_tag                  = "v${local.talos_version}"
+  talos_version                      = var.talos_version
+  talos_version_tag                  = var.talos_version_tag
   cluster_vip                        = "10.17.3.9"
   cluster_endpoint                   = "https://${local.cluster_vip}:6443" # k8s api-server endpoint.
   controller_nodes = [
