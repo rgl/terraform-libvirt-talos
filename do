@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+talos_version="1.5.3" # see https://github.com/siderolabs/talos/releases
+talos_qemu_guest_agent_extension_version="8.1.0" # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
+
 export TALOSCONFIG=$PWD/talosconfig.yml
 export KUBECONFIG=$PWD/kubeconfig.yml
 
@@ -8,7 +11,61 @@ function step {
   echo "### $* ###"
 }
 
+function build_talos_image {
+  # see https://www.talos.dev/v1.5/talos-guides/install/boot-assets/
+  # see https://www.talos.dev/v1.5/advanced/metal-network-configuration/
+  # see https://github.com/siderolabs/talos/blob/v1.5.3/pkg/imager/profile/profile.go#L20-L41
+  local talos_version_tag="v$talos_version"
+  rm -rf tmp/talos
+  mkdir -p tmp/talos
+  cat >"tmp/talos/talos-$talos_version.yml" <<EOF
+arch: amd64
+platform: nocloud
+secureboot: false
+version: $talos_version_tag
+customization:
+  extraKernelArgs:
+    - net.ifnames=0
+input:
+  kernel:
+    path: /usr/install/amd64/vmlinuz
+  initramfs:
+    path: /usr/install/amd64/initramfs.xz
+  baseInstaller:
+    imageRef: ghcr.io/siderolabs/installer:$talos_version_tag
+  systemExtensions:
+    - imageRef: ghcr.io/siderolabs/qemu-guest-agent:$talos_qemu_guest_agent_extension_version
+output:
+  kind: image
+  imageOptions:
+    diskSize: $((2*1024*1024*1024))
+    diskFormat: raw
+  outFormat: raw
+EOF
+  local talos_libvirt_base_volume_name="talos-$talos_version.qcow2"
+  docker run --rm -i \
+    -v $PWD/tmp/talos:/secureboot:ro \
+    -v $PWD/tmp/talos:/out \
+    -v /dev:/dev \
+    --privileged \
+    "ghcr.io/siderolabs/imager:$talos_version_tag" \
+    - <<<"$(cat tmp/talos/talos-$talos_version.yml)"
+  qemu-img convert -O qcow2 tmp/talos/nocloud-amd64.raw tmp/talos/$talos_libvirt_base_volume_name
+  qemu-img info tmp/talos/$talos_libvirt_base_volume_name
+  if [ -n "$(virsh vol-list default | grep $talos_libvirt_base_volume_name)" ]; then
+    virsh vol-delete --pool default $talos_libvirt_base_volume_name
+  fi
+  virsh vol-create-as default $talos_libvirt_base_volume_name 10M
+  virsh vol-upload --pool default $talos_libvirt_base_volume_name tmp/talos/$talos_libvirt_base_volume_name
+  cat >terraform.tfvars <<EOF
+talos_version                  = "$talos_version"
+talos_libvirt_base_volume_name = "$talos_libvirt_base_volume_name"
+EOF
+}
+
 function init {
+  step 'build talos image'
+  build_talos_image
   step 'terraform init'
   terraform init -lockfile=readonly
 }
@@ -84,7 +141,6 @@ case $1 in
   plan-apply)
     plan
     apply
-    upgrade
     ;;
   health)
     health

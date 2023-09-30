@@ -40,24 +40,7 @@ sudo install talosctl-linux-amd64 /usr/local/bin/talosctl
 rm talosctl-linux-amd64
 ```
 
-Install the talos image into libvirt:
-
-```bash
-talos_version='1.5.3'
-wget \
-  -O talos-$talos_version-nocloud-amd64.raw.xz \
-  https://github.com/siderolabs/talos/releases/download/v$talos_version/nocloud-amd64.raw.xz
-unxz talos-$talos_version-nocloud-amd64.raw.xz
-qemu-img convert -O qcow2 talos-$talos_version-nocloud-amd64.raw talos-$talos_version.qcow2
-qemu-img info talos-$talos_version.qcow2
-virsh vol-create-as default talos-$talos_version-amd64.qcow2 1G
-virsh vol-upload --pool default talos-$talos_version-amd64.qcow2 talos-$talos_version.qcow2
-rm -f talos-$talos_version-nocloud-amd64.raw talos-$talos_version.qcow2
-```
-
-**NB** To create a customized image (e.g. with different kernel arguments), see the [Boot Assets: Creating customized Talos boot assets, disk images, ISO and installer images](https://www.talos.dev/v1.5/talos-guides/install/boot-assets/) page.
-
-Initialize terraform:
+Install the talos image into libvirt, and initialize terraform:
 
 ```bash
 ./do init
