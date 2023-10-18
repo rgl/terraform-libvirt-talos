@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-talos_version="1.5.3" # see https://github.com/siderolabs/talos/releases
+talos_version="1.5.4" # see https://github.com/siderolabs/talos/releases
 talos_qemu_guest_agent_extension_version="8.1.1" # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
 
 export TALOSCONFIG=$PWD/talosconfig.yml
@@ -14,7 +14,7 @@ function step {
 function build_talos_image {
   # see https://www.talos.dev/v1.5/talos-guides/install/boot-assets/
   # see https://www.talos.dev/v1.5/advanced/metal-network-configuration/
-  # see https://github.com/siderolabs/talos/blob/v1.5.3/pkg/imager/profile/profile.go#L20-L41
+  # see Profile type at https://github.com/siderolabs/talos/blob/v1.5.4/pkg/imager/profile/profile.go#L20-L41
   local talos_version_tag="v$talos_version"
   rm -rf tmp/talos
   mkdir -p tmp/talos
