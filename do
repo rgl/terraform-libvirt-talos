@@ -4,6 +4,10 @@ set -euo pipefail
 talos_version="1.5.4" # see https://github.com/siderolabs/talos/releases
 talos_qemu_guest_agent_extension_version="8.1.1" # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
 
+export CHECKPOINT_DISABLE='1'
+export TF_LOG='DEBUG' # TRACE, DEBUG, INFO, WARN or ERROR.
+export TF_LOG_PATH='terraform.log'
+
 export TALOSCONFIG=$PWD/talosconfig.yml
 export KUBECONFIG=$PWD/kubeconfig.yml
 

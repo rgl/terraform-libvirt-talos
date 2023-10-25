@@ -2,6 +2,7 @@
 terraform.tfvars
 *terraform.tfstate*
 tfplan
+*.log
 *.raw
 *.qcow2
 *.gz
