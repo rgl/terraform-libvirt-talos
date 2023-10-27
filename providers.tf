@@ -24,6 +24,12 @@ terraform {
       source  = "siderolabs/talos"
       version = "0.3.4"
     }
+    # see https://registry.terraform.io/providers/hashicorp/helm
+    # see https://github.com/siderolabs/terraform-provider-talos
+    helm = {
+      source  = "hashicorp/helm"
+      version = "2.11.0"
+    }
   }
 }
 

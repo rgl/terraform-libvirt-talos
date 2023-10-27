@@ -2,7 +2,9 @@
 
 [![Lint](https://github.com/rgl/terraform-libvirt-talos/actions/workflows/lint.yml/badge.svg)](https://github.com/rgl/terraform-libvirt-talos/actions/workflows/lint.yml)
 
-An example Talos Linux Kubernetes cluster in libvirt QEMU/KVM Virtual Machines using terraform.
+An example [Talos Linux](https://www.talos.dev) Kubernetes cluster in libvirt QEMU/KVM Virtual Machines using terraform.
+
+[Cilium](https://cilium.io) is used to augment the Networking (e.g. the [`LoadBalancer`](https://cilium.io/use-cases/load-balancer/) and [`Ingress`](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) controllers), Observability (e.g. [Service Map](https://cilium.io/use-cases/service-map/)), and Security (e.g. [Network Policy](https://cilium.io/use-cases/network-policy/)).
 
 # Usage (Ubuntu 22.04 host)
 
@@ -29,6 +31,26 @@ wget https://releases.hashicorp.com/terraform/1.6.2/terraform_1.6.2_linux_amd64.
 unzip terraform_1.6.2_linux_amd64.zip
 sudo install terraform /usr/local/bin
 rm terraform terraform_*_linux_amd64.zip
+```
+
+Install cilium cli:
+
+```bash
+cilium_version='0.15.11'
+cilium_url="https://github.com/cilium/cilium-cli/releases/download/v$cilium_version/cilium-linux-amd64.tar.gz"
+wget -O- "$cilium_url" | tar xzf - cilium
+sudo install cilium /usr/local/bin/cilium
+rm cilium
+```
+
+Install cilium hubble:
+
+```bash
+hubble_version='0.12.2'
+hubble_url="https://github.com/cilium/hubble/releases/download/v$hubble_version/hubble-linux-amd64.tar.gz"
+wget -O- "$hubble_url" | tar xzf - hubble
+sudo install hubble /usr/local/bin/hubble
+rm hubble
 ```
 
 Install talosctl:
@@ -70,6 +92,36 @@ Show kubernetes information:
 export KUBECONFIG=$PWD/kubeconfig.yml
 kubectl cluster-info
 kubectl get nodes -o wide
+```
+
+Show Cilium information:
+
+```bash
+export KUBECONFIG=$PWD/kubeconfig.yml
+cilium status --wait
+```
+
+In another shell, open the Hubble UI:
+
+```bash
+export KUBECONFIG=$PWD/kubeconfig.yml
+cilium hubble ui
+```
+
+Execute an example workload:
+
+```bash
+export KUBECONFIG=$PWD/kubeconfig.yml
+kubectl apply -f example.yml
+kubectl get ingresses,services,pods
+example_ip="$(kubectl get ingress/example -o json | jq -r .status.loadBalancer.ingress[0].ip)"
+example_fqdn="$(kubectl get ingress/example -o json | jq -r .spec.rules[0].host)"
+example_url="http://$example_fqdn"
+curl --resolve "$example_fqdn:80:$example_ip" "$example_url"
+echo "$example_ip $example_fqdn" | sudo tee -a /etc/hosts
+curl "$example_url"
+xdg-open "$example_url"
+kubectl delete -f example.yml
 ```
 
 Destroy the infrastructure:
@@ -127,6 +179,19 @@ talosctl -n $c0 ps
 talosctl -n $c0 containers -k
 ```
 
+Cilium:
+
+```bash
+cilium status --wait
+cilium config view
+cilium hubble ui
+# **NB** cilium connectivity test is not working out-of-the-box in the default
+# test namespaces and using it in kube-system namespace will leave garbage
+# behind.
+#cilium connectivity test --test-namespace kube-system
+kubectl -n kube-system get leases | grep cilium-l2announce-
+```
+
 Kubernetes:
 
 ```bash
@@ -137,4 +202,6 @@ kubectl --namespace kube-system get configmaps coredns --output yaml
 pod_name="$(kubectl --namespace kube-system get pods --selector k8s-app=kube-dns --output json | jq -r '.items[0].metadata.name')"
 kubectl --namespace kube-system debug $pod_name --stdin --tty --image=busybox:1.36 --target=coredns -- sh -c 'cat /proc/$(pgrep coredns)/root/etc/resolv.conf'
 kubectl --namespace kube-system run busybox -it --rm --restart=Never --image=busybox:1.36 -- nslookup -type=a talos.dev
+kubectl get crds
+kubectl api-resources
 ```
