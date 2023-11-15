@@ -56,7 +56,7 @@ rm hubble
 Install talosctl:
 
 ```bash
-talos_version='1.5.4'
+talos_version='1.5.5'
 wget https://github.com/siderolabs/talos/releases/download/v$talos_version/talosctl-linux-amd64
 sudo install talosctl-linux-amd64 /usr/local/bin/talosctl
 rm talosctl-linux-amd64
