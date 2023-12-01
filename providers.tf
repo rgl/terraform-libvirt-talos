@@ -7,11 +7,6 @@ terraform {
       source  = "hashicorp/random"
       version = "3.5.1"
     }
-    # see https://registry.terraform.io/providers/hashicorp/template
-    template = {
-      source  = "hashicorp/template"
-      version = "2.2.0"
-    }
     # see https://registry.terraform.io/providers/dmacvicar/libvirt
     # see https://github.com/dmacvicar/terraform-provider-libvirt
     libvirt = {
