@@ -2,7 +2,7 @@
 set -euo pipefail
 
 talos_version="1.5.5" # see https://github.com/siderolabs/talos/releases
-talos_qemu_guest_agent_extension_version="8.1.1" # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
+talos_qemu_guest_agent_extension_version="8.1.3" # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
 
 export CHECKPOINT_DISABLE='1'
 export TF_LOG='DEBUG' # TRACE, DEBUG, INFO, WARN or ERROR.
