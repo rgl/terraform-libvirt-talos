@@ -13,7 +13,7 @@ variable "talos_version" {
 # see https://www.talos.dev/v1.5/introduction/support-matrix/
 variable "kubernetes_version" {
   type    = string
-  default = "1.26.9"
+  default = "1.26.11"
   validation {
     condition     = can(regex("^\\d+(\\.\\d+)+", var.kubernetes_version))
     error_message = "Must be a version number."
