@@ -4,7 +4,7 @@
 
 An example [Talos Linux](https://www.talos.dev) Kubernetes cluster in libvirt QEMU/KVM Virtual Machines using terraform.
 
-[Cilium](https://cilium.io) is used to augment the Networking (e.g. the [`LoadBalancer`](https://cilium.io/use-cases/load-balancer/) and [`Ingress`](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) controllers), Observability (e.g. [Service Map](https://cilium.io/use-cases/service-map/)), and Security (e.g. [Network Policy](https://cilium.io/use-cases/network-policy/)).
+[Cilium](https://cilium.io) is used to augment the Networking (e.g. the [`LoadBalancer`](https://cilium.io/use-cases/load-balancer/), [`Ingress`](https://docs.cilium.io/en/stable/network/servicemesh/ingress/), [Gateway API](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/) controllers), Observability (e.g. [Service Map](https://cilium.io/use-cases/service-map/)), and Security (e.g. [Network Policy](https://cilium.io/use-cases/network-policy/)).
 
 # Usage (Ubuntu 22.04 host)
 
@@ -114,15 +114,44 @@ Execute an example workload:
 export KUBECONFIG=$PWD/kubeconfig.yml
 kubectl apply -f example.yml
 kubectl rollout status deployment/example
-kubectl get ingresses,services,pods,deployments
-example_ip="$(kubectl get ingress/example -o json | jq -r .status.loadBalancer.ingress[0].ip)"
-example_fqdn="$(kubectl get ingress/example -o json | jq -r .spec.rules[0].host)"
-example_url="http://$example_fqdn"
-curl --resolve "$example_fqdn:80:$example_ip" "$example_url"
-echo "$example_ip $example_fqdn" | sudo tee -a /etc/hosts
-curl "$example_url"
-xdg-open "$example_url"
+```
+
+Test the ingress example endpoint:
+
+```bash
+# TODO understand why when we have an ingress and an gateway for the same
+#      service, the ingress does not work.
+#      TODO create a github issue for this.
+kubectl get ingress,gateways,httproutes,services,pods,deployments
+example_ingress_ip="$(kubectl get ingress/example -o json | jq -r .status.loadBalancer.ingress[0].ip)"
+example_ingress_fqdn="$(kubectl get ingress/example -o json | jq -r .spec.rules[0].host)"
+example_ingress_url="http://$example_ingress_fqdn"
+echo "$example_ingress_ip $example_ingress_url"
+curl --resolve "$example_ingress_fqdn:80:$example_ingress_ip" "$example_ingress_url"
+echo "$example_ingress_ip $example_ingress_fqdn" | sudo tee -a /etc/hosts
+curl "$example_ingress_url"
+xdg-open "$example_ingress_url"
+```
+
+Test the gateway example endpoint:
+
+```bash
+kubectl get ingress,gateways,httproutes,services,pods,deployments
+example_gateway_ip="$(kubectl get gateway/example -o json | jq -r .status.addresses[0].value)"
+example_gateway_fqdn="$(kubectl get gateway/example -o json | jq -r .spec.listeners[0].hostname)"
+example_gateway_url="http://$example_gateway_fqdn"
+echo "$example_gateway_ip $example_gateway_url"
+curl --resolve "$example_gateway_fqdn:80:$example_gateway_ip" "$example_gateway_url"
+echo "$example_gateway_ip $example_gateway_fqdn" | sudo tee -a /etc/hosts
+curl "$example_gateway_url"
+xdg-open "$example_gateway_url"
+```
+
+Delete the example:
+
+```bash
 kubectl delete -f example.yml
+kubectl get ingresses,gateways,httproutes,services,pods,deployments
 ```
 
 Destroy the infrastructure:
@@ -205,4 +234,9 @@ kubectl --namespace kube-system debug $pod_name --stdin --tty --image=busybox:1.
 kubectl --namespace kube-system run busybox -it --rm --restart=Never --image=busybox:1.36 -- nslookup -type=a talos.dev
 kubectl get crds
 kubectl api-resources
+kubectl get gateways,httproutes -A
+# dump the cilium manifest from the terraform state.
+jq -r '.resources[] | select(.type=="helm_template" and .name=="cilium") | .instances[0].attributes.manifest' terraform.tfstate | yq -P
+# dump the talos cluster cluster inline manifests from the terraform state.
+jq -r '.resources[] | select(.type=="talos_machine_configuration" and .name=="controller") | .instances[].attributes.config_patches[]' terraform.tfstate | yq '.cluster.inlineManifests[].contents' | yq -P
 ```

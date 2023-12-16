@@ -93,6 +93,7 @@ data "talos_machine_configuration" "controller" {
           {
             name = "cilium"
             contents = join("---\n", [
+              "# Source cilium.tf\n${local.gateway_api_manifest}",
               data.helm_template.cilium.manifest,
               "# Source cilium.tf\n${local.cilium_external_lb_manifest}",
             ])

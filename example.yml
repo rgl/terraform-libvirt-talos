@@ -7,7 +7,7 @@ metadata:
   name: example
 spec:
   rules:
-    - host: example.example.test
+    - host: example.ingress.example.test
       http:
         paths:
           - path: /
@@ -17,6 +17,44 @@ spec:
                 name: example
                 port:
                   name: web
+---
+# see https://gateway-api.sigs.k8s.io/guides/migrating-from-ingress/
+# see https://gateway-api.sigs.k8s.io/guides/http-routing/
+# see https://gateway-api.sigs.k8s.io/reference/spec/#gateway.networking.k8s.io/v1.Gateway
+# see https://github.com/kubernetes-sigs/gateway-api/blob/v1.0.0/apis/v1/gateway_types.go#L32-L45
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: example
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: example
+      hostname: example.gateway.example.test
+      port: 80
+      protocol: HTTP
+---
+# see https://gateway-api.sigs.k8s.io/guides/migrating-from-ingress/
+# see https://gateway-api.sigs.k8s.io/guides/http-routing/
+# see https://gateway-api.sigs.k8s.io/reference/spec/#gateway.networking.k8s.io/v1.HTTPRoute
+# see https://github.com/kubernetes-sigs/gateway-api/blob/v1.0.0/apis/v1/httproute_types.go#L30-L43
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: example
+spec:
+  parentRefs:
+    - name: example
+  hostnames:
+    - example.gateway.example.test
+  rules:
+    - matches:
+      - path:
+          type: PathPrefix
+          value: /
+      backendRefs:
+        - name: example
+          port: 80
 ---
 # see https://kubernetes.io/docs/concepts/services-networking/service/#type-clusterip
 # see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#service-v1-core
