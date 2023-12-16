@@ -44,6 +44,35 @@ locals {
   cilium_external_lb_manifest = join("---\n", [for d in local.cilium_external_lb_manifests : yamlencode(d)])
 }
 
+// see https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/
+// see https://gateway-api.sigs.k8s.io/guides/#installing-gateway-api
+// see https://github.com/kubernetes-sigs/gateway-api/issues/1590
+// see https://github.com/kubernetes-sigs/gateway-api
+// see https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http
+data "http" "gateway_api" {
+  url = "https://github.com/kubernetes-sigs/gateway-api/releases/download/${local.gateway_api_version_tag}/standard-install.yaml"
+}
+data "http" "gateway_api_tlsroutes" {
+  url = "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${local.gateway_api_version_tag}/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml"
+}
+locals {
+  # see https://github.com/kubernetes-sigs/gateway-api/releases
+  gateway_api_version_tag = "v1.0.0"
+  gateway_api_kubernetes_api_versions = [
+    # NB since we using terraform to render the helm template, we must set
+    #    which api versions are supported.
+    # NB this is required to trigger the "if .Capabilities" statement at:
+    #     https://github.com/cilium/cilium/blob/v1.15.0/install/kubernetes/cilium/templates/cilium-gateway-api-class.yaml#L2
+    #    otherwise there will be no cilium GatewayClass instance.
+    "gateway.networking.k8s.io/v1/GatewayClass",
+    "gateway.networking.k8s.io/v1",
+  ]
+  gateway_api_manifest = join("---\n", [
+    data.http.gateway_api.response_body,
+    data.http.gateway_api_tlsroutes.response_body,
+  ])
+}
+
 // see https://www.talos.dev/v1.6/kubernetes-guides/network/deploying-cilium/#method-4-helm-manifests-inline-install
 // see https://docs.cilium.io/en/stable/network/servicemesh/ingress/
 // see https://docs.cilium.io/en/stable/gettingstarted/hubble_setup/
@@ -53,11 +82,13 @@ locals {
 // see https://github.com/cilium/cilium/tree/v1.15.0/install/kubernetes/cilium
 // see https://registry.terraform.io/providers/hashicorp/helm/latest/docs/data-sources/template
 data "helm_template" "cilium" {
-  namespace  = "kube-system"
-  name       = "cilium"
-  repository = "https://helm.cilium.io"
-  chart      = "cilium"
-  version    = "1.15.0"
+  namespace    = "kube-system"
+  name         = "cilium"
+  repository   = "https://helm.cilium.io"
+  chart        = "cilium"
+  version      = "1.15.0"
+  kube_version = var.kubernetes_version
+  api_versions = local.gateway_api_kubernetes_api_versions
   set {
     name  = "ipam.mode"
     value = "kubernetes"
@@ -113,6 +144,10 @@ data "helm_template" "cilium" {
   set {
     name  = "ingressController.enforceHttps"
     value = "false"
+  }
+  set {
+    name  = "gatewayAPI.enabled"
+    value = "true"
   }
   set {
     name  = "envoy.enabled"

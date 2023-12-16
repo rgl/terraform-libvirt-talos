@@ -8,6 +8,12 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    # see https://registry.terraform.io/providers/hashicorp/http
+    # see https://github.com/hashicorp/terraform-provider-http
+    http = {
+      source  = "hashicorp/http"
+      version = "3.4.1"
+    }
     # see https://registry.terraform.io/providers/dmacvicar/libvirt
     # see https://github.com/dmacvicar/terraform-provider-libvirt
     libvirt = {
