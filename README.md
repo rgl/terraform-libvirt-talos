@@ -56,7 +56,7 @@ rm hubble
 Install talosctl:
 
 ```bash
-talos_version='1.5.5'
+talos_version='1.6.0'
 wget https://github.com/siderolabs/talos/releases/download/v$talos_version/talosctl-linux-amd64
 sudo install talosctl-linux-amd64 /usr/local/bin/talosctl
 rm talosctl-linux-amd64
@@ -135,7 +135,7 @@ time ./do destroy
 Talos:
 
 ```bash
-# see https://www.talos.dev/v1.5/advanced/troubleshooting-control-plane/
+# see https://www.talos.dev/v1.6/advanced/troubleshooting-control-plane/
 talosctl -n $all support && rm -rf support && 7z x -osupport support.zip && code support
 talosctl -n $c0 service ext-qemu-guest-agent status
 talosctl -n $c0 service etcd status

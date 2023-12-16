@@ -18,7 +18,7 @@ locals {
       #    talos image, which is created in the installed state.
       #install = {}
       features = {
-        # see https://www.talos.dev/v1.5/kubernetes-guides/configuration/kubeprism/
+        # see https://www.talos.dev/v1.6/kubernetes-guides/configuration/kubeprism/
         # see talosctl -n $c0 read /etc/kubernetes/kubeconfig-kubelet | yq .clusters[].cluster.server
         # NB if you use a non-default CNI, you must configure it to use the
         #    https://localhost:7445 kube-apiserver endpoint.
@@ -29,8 +29,8 @@ locals {
       }
     }
     cluster = {
-      # see https://www.talos.dev/v1.5/talos-guides/discovery/
-      # see https://www.talos.dev/v1.5/reference/configuration/#clusterdiscoveryconfig
+      # see https://www.talos.dev/v1.6/talos-guides/discovery/
+      # see https://www.talos.dev/v1.6/reference/configuration/#clusterdiscoveryconfig
       discovery = {
         enabled = true
         registries = {
@@ -75,7 +75,7 @@ data "talos_machine_configuration" "controller" {
       machine = {
         network = {
           interfaces = [
-            # see https://www.talos.dev/v1.5/talos-guides/network/vip/
+            # see https://www.talos.dev/v1.6/talos-guides/network/vip/
             {
               interface = "eth0"
               dhcp      = true

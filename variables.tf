@@ -1,8 +1,8 @@
 # see https://github.com/siderolabs/talos/releases
-# see https://www.talos.dev/v1.5/introduction/support-matrix/
+# see https://www.talos.dev/v1.6/introduction/support-matrix/
 variable "talos_version" {
   type    = string
-  default = "1.5.5"
+  default = "1.6.0"
   validation {
     condition     = can(regex("^\\d+(\\.\\d+)+", var.talos_version))
     error_message = "Must be a version number."
@@ -10,7 +10,7 @@ variable "talos_version" {
 }
 
 # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
-# see https://www.talos.dev/v1.5/introduction/support-matrix/
+# see https://www.talos.dev/v1.6/introduction/support-matrix/
 variable "kubernetes_version" {
   type    = string
   default = "1.26.11"
@@ -70,7 +70,7 @@ variable "worker_count" {
 
 variable "talos_libvirt_base_volume_name" {
   type    = string
-  default = "talos-1.5.5.qcow2"
+  default = "talos-1.6.0.qcow2"
   validation {
     condition     = can(regex(".+\\.qcow2+$", var.talos_libvirt_base_volume_name))
     error_message = "Must be a name with a .qcow2 extension."
