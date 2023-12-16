@@ -1,8 +1,8 @@
 locals {
   # see https://docs.cilium.io/en/stable/network/lb-ipam/
   # see https://docs.cilium.io/en/stable/network/l2-announcements/
-  # see the CiliumL2AnnouncementPolicy type at https://github.com/cilium/cilium/blob/v1.14.4/pkg/k8s/apis/cilium.io/v2alpha1/l2announcement_types.go#L20-L39
-  # see the CiliumLoadBalancerIPPool type at https://github.com/cilium/cilium/blob/v1.14.4/pkg/k8s/apis/cilium.io/v2alpha1/lbipam_types.go#L23-L47
+  # see the CiliumL2AnnouncementPolicy type at https://github.com/cilium/cilium/blob/v1.14.5/pkg/k8s/apis/cilium.io/v2alpha1/l2announcement_types.go#L20-L39
+  # see the CiliumLoadBalancerIPPool type at https://github.com/cilium/cilium/blob/v1.14.5/pkg/k8s/apis/cilium.io/v2alpha1/lbipam_types.go#L23-L47
   cilium_external_lb_manifests = [
     {
       apiVersion = "cilium.io/v2alpha1"
@@ -52,14 +52,14 @@ locals {
 // see https://docs.cilium.io/en/stable/gettingstarted/hubble/
 // see https://docs.cilium.io/en/stable/helm-reference/#helm-reference
 // see https://github.com/cilium/cilium/releases
-// see https://github.com/cilium/cilium/tree/v1.14.4/install/kubernetes/cilium
+// see https://github.com/cilium/cilium/tree/v1.14.5/install/kubernetes/cilium
 // see https://registry.terraform.io/providers/hashicorp/helm/latest/docs/data-sources/template
 data "helm_template" "cilium" {
   namespace  = "kube-system"
   name       = "cilium"
   repository = "https://helm.cilium.io"
   chart      = "cilium"
-  version    = "1.14.4"
+  version    = "1.14.5"
   set {
     name  = "ipam.mode"
     value = "kubernetes"
