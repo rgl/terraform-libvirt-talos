@@ -46,7 +46,7 @@ rm cilium
 Install cilium hubble:
 
 ```bash
-hubble_version='0.12.2'
+hubble_version='0.12.3'
 hubble_url="https://github.com/cilium/hubble/releases/download/v$hubble_version/hubble-linux-amd64.tar.gz"
 wget -O- "$hubble_url" | tar xzf - hubble
 sudo install hubble /usr/local/bin/hubble
