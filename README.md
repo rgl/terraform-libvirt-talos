@@ -36,7 +36,7 @@ rm terraform terraform_*_linux_amd64.zip
 Install cilium cli:
 
 ```bash
-cilium_version='0.15.17'
+cilium_version='0.15.18'
 cilium_url="https://github.com/cilium/cilium-cli/releases/download/v$cilium_version/cilium-linux-amd64.tar.gz"
 wget -O- "$cilium_url" | tar xzf - cilium
 sudo install cilium /usr/local/bin/cilium
