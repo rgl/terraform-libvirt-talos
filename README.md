@@ -113,8 +113,8 @@ Execute an example workload:
 ```bash
 export KUBECONFIG=$PWD/kubeconfig.yml
 kubectl apply -f example.yml
-kubectl rollout status daemonset/example
-kubectl get ingresses,services,pods
+kubectl rollout status deployment/example
+kubectl get ingresses,services,pods,deployments
 example_ip="$(kubectl get ingress/example -o json | jq -r .status.loadBalancer.ingress[0].ip)"
 example_fqdn="$(kubectl get ingress/example -o json | jq -r .spec.rules[0].host)"
 example_url="http://$example_fqdn"

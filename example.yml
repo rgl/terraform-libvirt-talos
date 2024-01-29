@@ -7,7 +7,7 @@ metadata:
   name: example
 spec:
   rules:
-    - host: example.test
+    - host: example.example.test
       http:
         paths:
           - path: /
@@ -18,7 +18,7 @@ spec:
                 port:
                   name: web
 ---
-# see https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
+# see https://kubernetes.io/docs/concepts/services-networking/service/#type-clusterip
 # see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#service-v1-core
 # see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#serviceport-v1-core
 apiVersion: v1
@@ -35,15 +35,16 @@ spec:
       protocol: TCP
       targetPort: web
 ---
-# see https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/
-# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#daemonset-v1-apps
+# see https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#deployment-v1-apps
 # see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#podtemplatespec-v1-core
 # see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#container-v1-core
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
   name: example
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: example
