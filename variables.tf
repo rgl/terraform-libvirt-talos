@@ -2,7 +2,7 @@
 # see https://www.talos.dev/v1.6/introduction/support-matrix/
 variable "talos_version" {
   type    = string
-  default = "1.6.3"
+  default = "1.6.4"
   validation {
     condition     = can(regex("^\\d+(\\.\\d+)+", var.talos_version))
     error_message = "Must be a version number."
@@ -70,7 +70,7 @@ variable "worker_count" {
 
 variable "talos_libvirt_base_volume_name" {
   type    = string
-  default = "talos-1.6.3.qcow2"
+  default = "talos-1.6.4.qcow2"
   validation {
     condition     = can(regex(".+\\.qcow2+$", var.talos_libvirt_base_volume_name))
     error_message = "Must be a name with a .qcow2 extension."
