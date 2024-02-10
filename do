@@ -39,6 +39,9 @@ input:
     imageRef: ghcr.io/siderolabs/installer:$talos_version_tag
   systemExtensions:
     - imageRef: ghcr.io/siderolabs/qemu-guest-agent:$talos_qemu_guest_agent_extension_version
+    # see https://github.com/siderolabs/extensions/pkgs/container/wasmedge
+    # see https://github.com/siderolabs/extensions/issues/318
+    - imageRef: ghcr.io/siderolabs/wasmedge@sha256:efb4ce0e6f6689fe0f876a788175c7e0b32bb012438415bc91b8dbee216fb6ec
 output:
   kind: image
   imageOptions:

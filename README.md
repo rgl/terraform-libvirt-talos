@@ -108,7 +108,7 @@ export KUBECONFIG=$PWD/kubeconfig.yml
 cilium hubble ui
 ```
 
-Execute an example workload:
+Execute an [example workload](https://github.com/rgl/example-docker-buildx-go):
 
 ```bash
 export KUBECONFIG=$PWD/kubeconfig.yml
@@ -123,6 +123,23 @@ echo "$example_ip $example_fqdn" | sudo tee -a /etc/hosts
 curl "$example_url"
 xdg-open "$example_url"
 kubectl delete -f example.yml
+```
+
+Execute an [example WebAssembly (Wasm) WasmEdge workload](https://github.com/rgl/wasmedge-http-rust-example):
+
+```bash
+export KUBECONFIG=$PWD/kubeconfig.yml
+kubectl apply -f example-wasmedge.yml
+kubectl rollout status deployment/example-wasmedge
+kubectl get ingresses,services,pods,deployments
+example_wasmedge_ip="$(kubectl get ingress/example-wasmedge -o json | jq -r .status.loadBalancer.ingress[0].ip)"
+example_wasmedge_fqdn="$(kubectl get ingress/example-wasmedge -o json | jq -r .spec.rules[0].host)"
+example_wasmedge_url="http://$example_wasmedge_fqdn"
+curl --resolve "$example_wasmedge_fqdn:80:$example_wasmedge_ip" "$example_wasmedge_url"
+echo "$example_wasmedge_ip $example_wasmedge_fqdn" | sudo tee -a /etc/hosts
+curl "$example_wasmedge_url"
+xdg-open "$example_wasmedge_url"
+kubectl delete -f example-wasmedge.yml
 ```
 
 Destroy the infrastructure:

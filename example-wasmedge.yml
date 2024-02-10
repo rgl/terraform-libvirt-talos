@@ -1,0 +1,74 @@
+---
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#runtimeclass-v1-node-k8s-io
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: wasmedge
+handler: wasmedge
+---
+# see https://kubernetes.io/docs/concepts/services-networking/ingress/
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#ingress-v1-networking-k8s-io
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-wasmedge
+spec:
+  rules:
+    - host: example-wasmedge.example.test
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: example-wasmedge
+                port:
+                  name: web
+---
+# see https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#deployment-v1-apps
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#podtemplatespec-v1-core
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#container-v1-core
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-wasmedge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example-wasmedge
+  template:
+    metadata:
+      labels:
+        app: example-wasmedge
+    spec:
+      runtimeClassName: wasmedge
+      enableServiceLinks: false
+      containers:
+        - name: example
+          # see https://github.com/rgl/wasmedge-http-rust-example
+          # see https://github.com/rgl/wasmedge-http-rust-example/pkgs/container/wasmedge-http-rust-example
+          # TODO https://github.com/containerd/runwasi/issues/477
+          image: ghcr.io/rgl/wasmedge-http-rust-example:0.0.4
+          ports:
+            - name: web
+              containerPort: 8080
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: '0.1'
+            limits:
+              memory: 32Mi
+              cpu: '0.1'
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 65534 # 65534 is the uid of the nobody user.
+            runAsGroup: 65534 # 65534 is the gid of the nogroup group.
+            seccompProfile:
+              type: RuntimeDefault

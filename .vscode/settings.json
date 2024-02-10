@@ -1,0 +1,26 @@
+{
+    "cSpell.words": [
+        "cmdline",
+        "containerd",
+        "coredns",
+        "crds",
+        "KUBECONFIG",
+        "kubelet",
+        "libvirtd",
+        "machineconfigs",
+        "nodeaddresses",
+        "nogroup",
+        "nslookup",
+        "pgrep",
+        "polkit",
+        "resolv",
+        "resourcedefinitions",
+        "staticpods",
+        "staticpodstatus",
+        "TALOSCONFIG",
+        "talosctl",
+        "usermod",
+        "virt",
+        "wasmedge"
+    ]
+}
