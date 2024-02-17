@@ -99,6 +99,7 @@ Show Cilium information:
 ```bash
 export KUBECONFIG=$PWD/kubeconfig.yml
 cilium status --wait
+kubectl -n kube-system exec ds/cilium -- cilium-dbg status --verbose
 ```
 
 In another shell, open the Hubble UI:
@@ -184,6 +185,7 @@ Cilium:
 
 ```bash
 cilium status --wait
+kubectl -n kube-system exec ds/cilium -- cilium-dbg status --verbose
 cilium config view
 cilium hubble ui
 # **NB** cilium connectivity test is not working out-of-the-box in the default
