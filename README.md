@@ -27,6 +27,7 @@ exit
 Install Terraform:
 
 ```bash
+# see https://github.com/hashicorp/terraform/releases
 wget https://releases.hashicorp.com/terraform/1.7.4/terraform_1.7.4_linux_amd64.zip
 unzip terraform_1.7.4_linux_amd64.zip
 sudo install terraform /usr/local/bin
@@ -36,6 +37,7 @@ rm terraform terraform_*_linux_amd64.zip
 Install cilium cli:
 
 ```bash
+# see https://github.com/cilium/cilium-cli/releases
 cilium_version='0.15.23'
 cilium_url="https://github.com/cilium/cilium-cli/releases/download/v$cilium_version/cilium-linux-amd64.tar.gz"
 wget -O- "$cilium_url" | tar xzf - cilium
@@ -46,6 +48,7 @@ rm cilium
 Install cilium hubble:
 
 ```bash
+# see https://github.com/cilium/hubble/releases
 hubble_version='0.13.0'
 hubble_url="https://github.com/cilium/hubble/releases/download/v$hubble_version/hubble-linux-amd64.tar.gz"
 wget -O- "$hubble_url" | tar xzf - hubble
@@ -56,6 +59,7 @@ rm hubble
 Install talosctl:
 
 ```bash
+# see https://github.com/siderolabs/talos/releases
 talos_version='1.6.5'
 wget https://github.com/siderolabs/talos/releases/download/v$talos_version/talosctl-linux-amd64
 sudo install talosctl-linux-amd64 /usr/local/bin/talosctl
