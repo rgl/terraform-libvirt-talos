@@ -1,7 +1,8 @@
 # see https://github.com/siderolabs/talos/releases
 # see https://www.talos.dev/v1.6/introduction/support-matrix/
 variable "talos_version" {
-  type    = string
+  type = string
+  # renovate: datasource=github-releases depName=siderolabs/talos
   default = "1.6.5"
   validation {
     condition     = can(regex("^\\d+(\\.\\d+)+", var.talos_version))
@@ -12,7 +13,8 @@ variable "talos_version" {
 # see https://github.com/siderolabs/kubelet/pkgs/container/kubelet
 # see https://www.talos.dev/v1.6/introduction/support-matrix/
 variable "kubernetes_version" {
-  type    = string
+  type = string
+  # renovate: datasource=github-releases depName=siderolabs/kubelet
   default = "1.29.2"
   validation {
     condition     = can(regex("^\\d+(\\.\\d+)+", var.kubernetes_version))
