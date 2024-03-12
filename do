@@ -7,7 +7,7 @@ talos_version="1.6.5"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
 # renovate: datasource=docker depName=siderolabs/qemu-guest-agent registryUrl=https://ghcr.io
-talos_qemu_guest_agent_extension_version="8.1.3"
+talos_qemu_guest_agent_extension_version="8.2.2"
 
 export CHECKPOINT_DISABLE='1'
 export TF_LOG='DEBUG' # TRACE, DEBUG, INFO, WARN or ERROR.
