@@ -3,7 +3,7 @@ set -euo pipefail
 
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
-talos_version="1.6.7"
+talos_version="1.7.0-alpha.1"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
 # renovate: datasource=docker depName=siderolabs/qemu-guest-agent registryUrl=https://ghcr.io
@@ -21,9 +21,9 @@ function step {
 }
 
 function build_talos_image {
-  # see https://www.talos.dev/v1.6/talos-guides/install/boot-assets/
-  # see https://www.talos.dev/v1.6/advanced/metal-network-configuration/
-  # see Profile type at https://github.com/siderolabs/talos/blob/v1.6.7/pkg/imager/profile/profile.go#L20-L41
+  # see https://www.talos.dev/v1.7/talos-guides/install/boot-assets/
+  # see https://www.talos.dev/v1.7/advanced/metal-network-configuration/
+  # see Profile type at https://github.com/siderolabs/talos/blob/v1.7.0-alpha.1/pkg/imager/profile/profile.go#L22-L45
   local talos_version_tag="v$talos_version"
   rm -rf tmp/talos
   mkdir -p tmp/talos
