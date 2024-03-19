@@ -58,7 +58,7 @@ EOF
     -v /dev:/dev \
     --privileged \
     "ghcr.io/siderolabs/imager:$talos_version_tag" \
-    - <<<"$(cat tmp/talos/talos-$talos_version.yml)"
+    - < "tmp/talos/talos-$talos_version.yml"
   qemu-img convert -O qcow2 tmp/talos/nocloud-amd64.raw tmp/talos/$talos_libvirt_base_volume_name
   qemu-img info tmp/talos/$talos_libvirt_base_volume_name
   if [ -n "$(virsh vol-list default | grep $talos_libvirt_base_volume_name)" ]; then
