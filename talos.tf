@@ -2,13 +2,13 @@ locals {
   controller_nodes = [
     for i in range(var.controller_count) : {
       name    = "c${i}"
-      address = "${var.cluster_node_network_prefix}.${10 + i}"
+      address = cidrhost(var.cluster_node_network, var.cluster_node_network_first_controller_hostnum + i)
     }
   ]
   worker_nodes = [
     for i in range(var.worker_count) : {
       name    = "w${i}"
-      address = "${var.cluster_node_network_prefix}.${20 + i}"
+      address = cidrhost(var.cluster_node_network, var.cluster_node_network_first_worker_hostnum + i)
     }
   ]
   common_machine_config = {

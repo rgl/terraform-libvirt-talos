@@ -40,10 +40,34 @@ variable "cluster_endpoint" {
   default     = "https://10.17.3.9:6443" # k8s api-server endpoint.
 }
 
-variable "cluster_node_network_prefix" {
-  description = "The IP network prefix of the cluster nodes"
+variable "cluster_node_network" {
+  description = "The IP network of the cluster nodes"
   type        = string
-  default     = "10.17.3"
+  default     = "10.17.3.0/24"
+}
+
+variable "cluster_node_network_first_controller_hostnum" {
+  description = "The hostnum of the first controller host"
+  type        = number
+  default     = 80
+}
+
+variable "cluster_node_network_first_worker_hostnum" {
+  description = "The hostnum of the first worker host"
+  type        = number
+  default     = 90
+}
+
+variable "cluster_node_network_load_balancer_first_hostnum" {
+  description = "The hostnum of the first load balancer host"
+  type        = number
+  default     = 130
+}
+
+variable "cluster_node_network_load_balancer_last_hostnum" {
+  description = "The hostnum of the last load balancer host"
+  type        = number
+  default     = 230
 }
 
 variable "cluster_node_domain" {

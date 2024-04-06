@@ -34,8 +34,8 @@ locals {
       spec = {
         blocks = [
           {
-            start = "${var.cluster_node_network_prefix}.129"
-            stop  = "${var.cluster_node_network_prefix}.254"
+            start = cidrhost(var.cluster_node_network, var.cluster_node_network_load_balancer_first_hostnum)
+            stop  = cidrhost(var.cluster_node_network, var.cluster_node_network_load_balancer_last_hostnum)
           },
         ]
       }

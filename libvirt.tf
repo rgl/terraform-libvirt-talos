@@ -3,7 +3,7 @@ resource "libvirt_network" "talos" {
   name      = var.prefix
   mode      = "nat"
   domain    = var.cluster_node_domain
-  addresses = ["${var.cluster_node_network_prefix}.0/24"]
+  addresses = [var.cluster_node_network]
   dhcp {
     enabled = true
   }
