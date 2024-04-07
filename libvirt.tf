@@ -31,6 +31,14 @@ resource "libvirt_volume" "worker" {
   size             = 40 * 1024 * 1024 * 1024 # 40GiB.
 }
 
+# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.7.6/website/docs/r/volume.html.markdown
+resource "libvirt_volume" "worker_data0" {
+  count  = var.worker_count
+  name   = "${var.prefix}_w${count.index}d0.img"
+  format = "qcow2"
+  size   = 32 * 1024 * 1024 * 1024 # 32GiB.
+}
+
 # see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.7.6/website/docs/r/domain.html.markdown
 resource "libvirt_domain" "controller" {
   count      = var.controller_count
@@ -42,7 +50,7 @@ resource "libvirt_domain" "controller" {
     mode = "host-passthrough"
   }
   vcpu   = 4
-  memory = 2 * 1024
+  memory = 4 * 1024
   video {
     type = "qxl"
   }
@@ -82,6 +90,11 @@ resource "libvirt_domain" "worker" {
   disk {
     volume_id = libvirt_volume.worker[count.index].id
     scsi      = true
+  }
+  disk {
+    volume_id = libvirt_volume.worker_data0[count.index].id
+    scsi      = true
+    wwn       = format("000000000000ab%02x", count.index)
   }
   network_interface {
     network_id     = libvirt_network.talos.id
