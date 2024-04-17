@@ -105,6 +105,7 @@ function apply {
   terraform output -raw kubeconfig >kubeconfig.yml
   health
   piraeus-install
+  info
 }
 
 function health {
@@ -116,7 +117,6 @@ function health {
     health \
     --control-plane-nodes $controllers \
     --worker-nodes $workers
-  info
 }
 
 function piraeus-install {
@@ -211,6 +211,9 @@ EOF
         "/dev/disk/by-id/wwn-0x$wwn"
     fi
   done
+}
+
+function piraeus-info {
   step 'piraeus node list'
   kubectl linstor node list
   step 'piraeus storage-pool list'
@@ -236,6 +239,9 @@ function info {
     talosctl -n $n read /etc/os-release \
       | sed -E "s,(.+),$n: \1,g"
   done
+  step 'kubernetes nodes'
+  kubectl get nodes -o wide
+  piraeus-info
 }
 
 function upgrade {
