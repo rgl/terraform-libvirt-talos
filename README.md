@@ -31,7 +31,7 @@ Install Terraform:
 ```bash
 # see https://github.com/hashicorp/terraform/releases
 # renovate: datasource=github-releases depName=hashicorp/terraform
-terraform_version='1.8.1'
+terraform_version='1.8.2'
 wget "https://releases.hashicorp.com/terraform/$terraform_version/terraform_${$terraform_version}_linux_amd64.zip"
 unzip "terraform_${$terraform_version}_linux_amd64.zip"
 sudo install terraform /usr/local/bin
@@ -43,7 +43,7 @@ Install cilium cli:
 ```bash
 # see https://github.com/cilium/cilium-cli/releases
 # renovate: datasource=github-releases depName=cilium/cilium-cli
-cilium_version='0.16.4'
+cilium_version='0.16.6'
 cilium_url="https://github.com/cilium/cilium-cli/releases/download/v$cilium_version/cilium-linux-amd64.tar.gz"
 wget -O- "$cilium_url" | tar xzf - cilium
 sudo install cilium /usr/local/bin/cilium
@@ -55,7 +55,7 @@ Install cilium hubble:
 ```bash
 # see https://github.com/cilium/hubble/releases
 # renovate: datasource=github-releases depName=cilium/hubble
-hubble_version='0.13.2'
+hubble_version='0.13.3'
 hubble_url="https://github.com/cilium/hubble/releases/download/v$hubble_version/hubble-linux-amd64.tar.gz"
 wget -O- "$hubble_url" | tar xzf - hubble
 sudo install hubble /usr/local/bin/hubble
@@ -155,9 +155,12 @@ kubectl delete -f example.yml
 Execute the [example hello-etcd stateful application](https://github.com/rgl/hello-etcd):
 
 ```bash
+# see https://github.com/rgl/hello-etcd/tags
+# renovate: datasource=github-tags depName=rgl/hello-etcd
+hello_etcd_version='0.0.2'
 install -d tmp/hello-etcd
 pushd tmp/hello-etcd
-wget -qO- https://raw.githubusercontent.com/rgl/hello-etcd/v0.0.2/manifest.yml \
+wget -qO- "https://raw.githubusercontent.com/rgl/hello-etcd/v$hello_etcd_version/manifest.yml" \
   | perl -pe 's,(storageClassName:).+,$1 linstor-lvm-r1,g' \
   | perl -pe 's,(storage:).+,$1 1Gi,g' \
   > manifest.yml
