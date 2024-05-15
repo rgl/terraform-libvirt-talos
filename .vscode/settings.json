@@ -7,6 +7,7 @@
         "daemonset",
         "datasource",
         "drbdadm",
+        "healthz",
         "KUBECONFIG",
         "kubelet",
         "libvirtd",
@@ -33,6 +34,7 @@
         "usermod",
         "usermode",
         "vgdisplay",
-        "virt"
+        "virt",
+        "wasmtime"
     ]
 }

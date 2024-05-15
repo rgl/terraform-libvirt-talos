@@ -228,6 +228,23 @@ kubectl linstor volume list
 popd
 ```
 
+Execute an [example WebAssembly (Wasm) Spin workload](https://github.com/rgl/spin-http-rust-example):
+
+```bash
+export KUBECONFIG=$PWD/kubeconfig.yml
+kubectl apply -f example-spin.yml
+kubectl rollout status deployment/example-spin
+kubectl get ingresses,services,pods,deployments
+example_spin_ip="$(kubectl get ingress/example-spin -o json | jq -r .status.loadBalancer.ingress[0].ip)"
+example_spin_fqdn="$(kubectl get ingress/example-spin -o json | jq -r .spec.rules[0].host)"
+example_spin_url="http://$example_spin_fqdn"
+curl --resolve "$example_spin_fqdn:80:$example_spin_ip" "$example_spin_url"
+echo "$example_spin_ip $example_spin_fqdn" | sudo tee -a /etc/hosts
+curl "$example_spin_url"
+xdg-open "$example_spin_url"
+kubectl delete -f example-spin.yml
+```
+
 Destroy the infrastructure:
 
 ```bash
