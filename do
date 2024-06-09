@@ -15,7 +15,7 @@ talos_qemu_guest_agent_extension_version="8.2.3"
 # see https://github.com/LINBIT/drbd
 # NB the full version version is actually $version-v$talos_version, which we
 #    use in the talos systemExtension imageRef.
-# renovate: datasource=docker depName=siderolabs/drbd extractVersion=^(?<version>.+)-v registryUrl=https://ghcr.io
+# renovate: datasource=docker depName=siderolabs/drbd extractVersion=^(?<version>.+)-v1\.7\.2 registryUrl=https://ghcr.io
 talos_drbd_extension_version="9.2.8"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/spin
