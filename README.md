@@ -217,7 +217,7 @@ Delete everything:
 
 ```bash
 kubectl delete -f manifest.yml
-kill %1 # kill the kubectl port-forward background command execution.
+kill %1 && sleep 1 # kill the kubectl port-forward background command execution.
 # NB the pvc will not be automatically deleted because it has the
 #    kubernetes.io/pvc-protection finalizer (set by the statefulset, due to
 #    having persistentVolumeClaimRetentionPolicy set to Retain), which prevents
