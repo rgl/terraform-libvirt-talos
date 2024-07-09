@@ -250,6 +250,22 @@ xdg-open "$example_spin_url"
 kubectl delete -f example-spin.yml
 ```
 
+Access Argo CD:
+
+```bash
+export KUBECONFIG=$PWD/kubeconfig.yml
+argocd_server_ip="$(kubectl get -n argocd ingress/argocd-server -o json | jq -r .status.loadBalancer.ingress[0].ip)"
+argocd_server_fqdn="$(kubectl get -n argocd ingress/argocd-server -o json | jq -r .spec.rules[0].host)"
+argocd_server_url="http://$argocd_server_fqdn"
+argocd_server_admin_password="$(
+  kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" \
+    | base64 --decode)"
+echo "$argocd_server_ip $argocd_server_fqdn" | sudo tee -a /etc/hosts
+echo "argocd_server_url: $argocd_server_url"
+echo "argocd_server_admin_password: $argocd_server_admin_password"
+xdg-open "$argocd_server_url"
+```
+
 Destroy the infrastructure:
 
 ```bash

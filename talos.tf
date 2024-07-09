@@ -143,6 +143,20 @@ data "talos_machine_configuration" "controller" {
             name     = "reloader"
             contents = data.helm_template.reloader.manifest
           },
+          {
+            name = "argocd"
+            contents = join("---\n", [
+              yamlencode({
+                apiVersion = "v1"
+                kind       = "Namespace"
+                metadata = {
+                  name = "argocd"
+                }
+              }),
+              data.helm_template.argocd.manifest,
+              "# Source argocd.tf\n${local.argocd_manifest}",
+            ])
+          },
         ],
       },
     }),

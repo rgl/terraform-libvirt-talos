@@ -83,7 +83,7 @@ resource "libvirt_domain" "worker" {
     mode = "host-passthrough"
   }
   vcpu   = 4
-  memory = 2 * 1024
+  memory = 4 * 1024
   video {
     type = "qxl"
   }
