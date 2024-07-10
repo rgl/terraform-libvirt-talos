@@ -105,13 +105,6 @@ data "talos_machine_configuration" "controller" {
       cluster = {
         inlineManifests = [
           {
-            name = "cilium"
-            contents = join("---\n", [
-              data.helm_template.cilium.manifest,
-              "# Source cilium.tf\n${local.cilium_external_lb_manifest}",
-            ])
-          },
-          {
             name     = "spin"
             contents = <<-EOF
             apiVersion: node.k8s.io/v1
@@ -120,6 +113,27 @@ data "talos_machine_configuration" "controller" {
               name: wasmtime-spin-v2
             handler: spin
             EOF
+          },
+          {
+            name = "cilium"
+            contents = join("---\n", [
+              data.helm_template.cilium.manifest,
+              "# Source cilium.tf\n${local.cilium_external_lb_manifest}",
+            ])
+          },
+          {
+            name = "cert-manager"
+            contents = join("---\n", [
+              yamlencode({
+                apiVersion = "v1"
+                kind       = "Namespace"
+                metadata = {
+                  name = "cert-manager"
+                }
+              }),
+              data.helm_template.cert_manager.manifest,
+              "# Source cert-manager.tf\n${local.cert_manager_ingress_ca_manifest}",
+            ])
           },
         ],
       },

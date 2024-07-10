@@ -58,7 +58,9 @@ data "helm_template" "cilium" {
   repository = "https://helm.cilium.io"
   chart      = "cilium"
   # renovate: datasource=helm depName=cilium registryUrl=https://helm.cilium.io
-  version = "1.15.6"
+  version      = "1.15.6"
+  kube_version = var.kubernetes_version
+  api_versions = []
   set {
     name  = "ipam.mode"
     value = "kubernetes"

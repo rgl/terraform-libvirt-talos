@@ -76,6 +76,12 @@ variable "cluster_node_domain" {
   default     = "talos.test"
 }
 
+variable "ingress_domain" {
+  description = "the DNS domain of the ingress resources"
+  type        = string
+  default     = "example.test"
+}
+
 variable "controller_count" {
   type    = number
   default = 1
