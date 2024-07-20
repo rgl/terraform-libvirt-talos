@@ -5,7 +5,7 @@ locals {
     # NB argocd-server will automatically reload this secret.
     # NB alternatively we could set the server.certificate.enabled helm value. but
     #    that does not allow us to fully customize the certificate (e.g. subject).
-    # see https://github.com/argoproj/argo-helm/blob/argo-cd-7.3.6/charts/argo-cd/templates/argocd-server/certificate.yaml
+    # see https://github.com/argoproj/argo-helm/blob/argo-cd-7.3.9/charts/argo-cd/templates/argocd-server/certificate.yaml
     # see https://argo-cd.readthedocs.io/en/stable/operator-manual/tls/
     # see https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.Certificate
     {
@@ -48,7 +48,7 @@ locals {
 
 # set the configuration.
 # NB the default values are described at:
-#       https://github.com/argoproj/argo-helm/blob/argo-cd-7.3.6/charts/argo-cd/values.yaml
+#       https://github.com/argoproj/argo-helm/blob/argo-cd-7.3.9/charts/argo-cd/values.yaml
 #    NB make sure you are seeing the same version of the chart that you are installing.
 # see https://registry.terraform.io/providers/hashicorp/helm/latest/docs/data-sources/template
 data "helm_template" "argocd" {
@@ -58,7 +58,7 @@ data "helm_template" "argocd" {
   chart      = "argo-cd"
   # see https://artifacthub.io/packages/helm/argo/argo-cd
   # renovate: datasource=helm depName=argo-cd registryUrl=https://argoproj.github.io/argo-helm
-  version      = "7.3.6"
+  version      = "7.3.9"
   kube_version = var.kubernetes_version
   api_versions = []
   set {
