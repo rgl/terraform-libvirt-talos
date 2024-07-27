@@ -150,7 +150,7 @@ data "talos_machine_configuration" "controller" {
                 apiVersion = "v1"
                 kind       = "Namespace"
                 metadata = {
-                  name = "argocd"
+                  name = local.argocd_namespace
                 }
               }),
               data.helm_template.argocd.manifest,

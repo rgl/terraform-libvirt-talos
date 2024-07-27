@@ -256,14 +256,31 @@ Access Argo CD:
 export KUBECONFIG=$PWD/kubeconfig.yml
 argocd_server_ip="$(kubectl get -n argocd ingress/argocd-server -o json | jq -r .status.loadBalancer.ingress[0].ip)"
 argocd_server_fqdn="$(kubectl get -n argocd ingress/argocd-server -o json | jq -r .spec.rules[0].host)"
-argocd_server_url="http://$argocd_server_fqdn"
+argocd_server_url="https://$argocd_server_fqdn"
 argocd_server_admin_password="$(
   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" \
     | base64 --decode)"
-echo "$argocd_server_ip $argocd_server_fqdn" | sudo tee -a /etc/hosts
 echo "argocd_server_url: $argocd_server_url"
 echo "argocd_server_admin_password: $argocd_server_admin_password"
+echo "$argocd_server_ip $argocd_server_fqdn" | sudo tee -a /etc/hosts
 xdg-open "$argocd_server_url"
+```
+
+If the Argo CD UI is showing these kind of errors:
+
+> Unable to load data: error getting cached app managed resources: NOAUTH Authentication required.
+> Unable to load data: error getting cached app managed resources: cache: key is missing
+> Unable to load data: error getting cached app managed resources: InvalidSpecError: Application referencing project default which does not exist
+
+Try restarting some of the Argo CD components, and after restarting them, the
+Argo CD UI should start working after a few minutes (e.g. at the next sync
+interval, which defaults to 3m):
+
+```bash
+kubectl -n argocd rollout restart statefulset argocd-application-controller
+kubectl -n argocd rollout status statefulset argocd-application-controller --watch
+kubectl -n argocd rollout restart deployment argocd-server
+kubectl -n argocd rollout status deployment argocd-server --watch
 ```
 
 Destroy the infrastructure:
