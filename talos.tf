@@ -144,6 +144,20 @@ data "talos_machine_configuration" "controller" {
             contents = data.helm_template.reloader.manifest
           },
           {
+            name = "gitea"
+            contents = join("---\n", [
+              yamlencode({
+                apiVersion = "v1"
+                kind       = "Namespace"
+                metadata = {
+                  name = local.gitea_namespace
+                }
+              }),
+              data.helm_template.gitea.manifest,
+              "# Source gitea.tf\n${local.gitea_manifest}",
+            ])
+          },
+          {
             name = "argocd"
             contents = join("---\n", [
               yamlencode({
