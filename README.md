@@ -285,6 +285,7 @@ xdg-open "$argocd_server_url"
 
 If the Argo CD UI is showing these kind of errors:
 
+> Unable to load data: permission denied
 > Unable to load data: error getting cached app managed resources: NOAUTH Authentication required.
 > Unable to load data: error getting cached app managed resources: cache: key is missing
 > Unable to load data: error getting cached app managed resources: InvalidSpecError: Application referencing project default which does not exist
@@ -300,10 +301,9 @@ kubectl -n argocd rollout restart deployment argocd-server
 kubectl -n argocd rollout status deployment argocd-server --watch
 ```
 
-Deploy an example Argo CD application:
+Create the `argocd-example` repository:
 
 ```bash
-# create the example repository.
 export SSL_CERT_FILE="$PWD/kubernetes-ingress-ca-crt.pem"
 export GIT_SSL_CAINFO="$SSL_CERT_FILE"
 curl \
@@ -330,15 +330,19 @@ git commit -m init
 git remote add origin https://gitea.example.test/gitea/argocd-example.git
 git push -u origin main
 popd
+```
 
-# create the argocd-example argocd application.
-# NB we have to access gitea thru the internal cluster service because the
-#    external/ingress domains does not resolve inside the cluster.
+Create the `argocd-example` argocd application:
+
+```bash
+# TODO why are each of these argocd commands taking ~20s to complete?
 argocd login \
   "$argocd_server_fqdn" \
   --username admin \
   --password "$argocd_server_admin_password"
 argocd cluster list
+# NB we have to access gitea thru the internal cluster service because the
+#    external/ingress domains does not resolve inside the cluster.
 # NB if git repository was hosted outside of the cluster, we might have
 #    needed to execute the following to trust the certificate.
 #     argocd cert add-tls gitea.example.test --from "$SSL_CERT_FILE"
@@ -358,11 +362,15 @@ argocd app create \
   --repo http://gitea-http.default.svc:3000/gitea/argocd-example.git \
   --path .
 argocd app list
+argocd app wait argocd-example --health --timeout 300
 kubectl get crd | grep argoproj.io
 kubectl -n argocd get applications
 kubectl -n argocd get application/argocd-example -o yaml
+```
 
-# access the example application.
+Access the example application:
+
+```bash
 kubectl rollout status deployment/example
 kubectl get ingresses,services,pods,deployments
 example_ip="$(kubectl get ingress/example -o json | jq -r .status.loadBalancer.ingress[0].ip)"
@@ -372,8 +380,11 @@ curl --resolve "$example_fqdn:80:$example_ip" "$example_url"
 echo "$example_ip $example_fqdn" | sudo tee -a /etc/hosts
 curl "$example_url"
 xdg-open "$example_url"
+```
 
-# modify the example application.
+Modify the example application, by bumping the number of replicas:
+
+```bash
 pushd tmp/argocd-example
 sed -i -E 's,(replicas:) .+,\1 3,g' example.yml
 git diff
@@ -381,14 +392,28 @@ git add .
 git commit -m 'bump replicas'
 git push -u origin main
 popd
+```
 
-# then go the argocd ui, and wait for it to eventually sync the argocd
-# example application.
+Then go the Argo CD UI, and wait for it to eventually sync the example argocd
+application, or click `Refresh` to sync it immediately.
 
-# delete the argocd-example argocd application.
+Delete the example argocd application and repository:
+
+```bash
 argocd app delete \
   argocd-example \
   --yes
+argocd repo rm \
+  http://gitea-http.default.svc:3000/gitea/argocd-example.git
+curl \
+  --silent \
+  --show-error \
+  --fail-with-body \
+  -u gitea:gitea \
+  -X DELETE \
+  -H 'Accept: application/json' \
+  "$gitea_url/api/v1/repos/gitea/argocd-example" \
+  | jq
 ```
 
 Destroy the infrastructure:
