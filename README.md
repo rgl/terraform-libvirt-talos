@@ -31,11 +31,11 @@ exit
 Install Terraform:
 
 ```bash
-# see https://github.com/hashicorp/terraform/releases
-# renovate: datasource=github-releases depName=hashicorp/terraform
+# See https://github.com/hashicorp/terraform/releases
+# Renovate: datasource=github-releases depName=hashicorp/terraform
 terraform_version='1.9.4'
-wget "https://releases.hashicorp.com/terraform/$terraform_version/terraform_${$terraform_version}_linux_amd64.zip"
-unzip "terraform_${$terraform_version}_linux_amd64.zip"
+wget "https://releases.hashicorp.com/terraform/$terraform_version/terraform_${terraform_version}_linux_amd64.zip"
+unzip "terraform_${terraform_version}_linux_amd64.zip"
 sudo install terraform /usr/local/bin
 rm terraform terraform_*_linux_amd64.zip
 ```
