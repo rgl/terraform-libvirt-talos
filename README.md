@@ -256,8 +256,8 @@ Access Gitea:
 ```bash
 export KUBECONFIG=$PWD/kubeconfig.yml
 export SSL_CERT_FILE="$PWD/kubernetes-ingress-ca-crt.pem"
-gitea_ip="$(kubectl get ingress/gitea -o json | jq -r .status.loadBalancer.ingress[0].ip)"
-gitea_fqdn="$(kubectl get ingress/gitea -o json | jq -r .spec.rules[0].host)"
+gitea_ip="$(kubectl get -n gitea ingress/gitea -o json | jq -r .status.loadBalancer.ingress[0].ip)"
+gitea_fqdn="$(kubectl get -n gitea ingress/gitea -o json | jq -r .spec.rules[0].host)"
 gitea_url="https://$gitea_fqdn"
 echo "gitea_url: $gitea_url"
 echo "gitea_username: gitea"
@@ -348,7 +348,7 @@ argocd cluster list
 #     argocd cert add-tls gitea.example.test --from "$SSL_CERT_FILE"
 #     argocd cert list --cert-type https
 argocd repo add \
-  http://gitea-http.default.svc:3000/gitea/argocd-example.git \
+  http://gitea-http.gitea.svc:3000/gitea/argocd-example.git \
   --username gitea \
   --password gitea
 argocd app create \
@@ -359,7 +359,7 @@ argocd app create \
   --auto-prune \
   --self-heal \
   --sync-policy automatic \
-  --repo http://gitea-http.default.svc:3000/gitea/argocd-example.git \
+  --repo http://gitea-http.gitea.svc:3000/gitea/argocd-example.git \
   --path .
 argocd app list
 argocd app wait argocd-example --health --timeout 300
@@ -404,7 +404,7 @@ argocd app delete \
   argocd-example \
   --yes
 argocd repo rm \
-  http://gitea-http.default.svc:3000/gitea/argocd-example.git
+  http://gitea-http.gitea.svc:3000/gitea/argocd-example.git
 curl \
   --silent \
   --show-error \
