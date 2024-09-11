@@ -1,0 +1,164 @@
+---
+# see https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#serviceaccount-v1-core
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubernetes-hello
+---
+# see https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#role-v1-rbac-authorization-k8s-io
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-read
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+---
+# see https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#rolebinding-v1-rbac-authorization-k8s-io
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubernetes-hello-pod-read
+subjects:
+  - kind: ServiceAccount
+    name: kubernetes-hello
+roleRef:
+  kind: Role
+  name: pod-read
+  apiGroup: rbac.authorization.k8s.io
+---
+# see https://kubernetes.io/docs/concepts/services-networking/ingress/
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#ingress-v1-networking-k8s-io
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kubernetes-hello
+spec:
+  rules:
+    - host: kubernetes-hello.example.test
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kubernetes-hello
+                port:
+                  name: web
+---
+# see https://kubernetes.io/docs/concepts/services-networking/service/#type-clusterip
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#service-v1-core
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#serviceport-v1-core
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubernetes-hello
+spec:
+  type: ClusterIP
+  selector:
+    app: kubernetes-hello
+  ports:
+    - name: web
+      port: 80
+      protocol: TCP
+      targetPort: web
+---
+# see https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#deployment-v1-apps
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#podtemplatespec-v1-core
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#container-v1-core
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubernetes-hello
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubernetes-hello
+  template:
+    metadata:
+      labels:
+        app: kubernetes-hello
+    spec:
+      serviceAccountName: kubernetes-hello
+      enableServiceLinks: false
+      containers:
+        # see https://github.com/rgl/kubernetes-hello
+        - name: kubernetes-hello
+          image: zot.zot.svc.cluster.local:5000/ruilopes/kubernetes-hello:v0.0.202408161942
+          env:
+            # configure the go runtime to honor the k8s memory and cpu resource
+            # limits.
+            # NB resourceFieldRef will cast the limits to bytes and integer
+            #    number of cpus (rounding up to the nearest integer).
+            # see https://pkg.go.dev/runtime
+            # see https://www.riverphillips.dev/blog/go-cfs/
+            # see https://github.com/golang/go/issues/33803
+            # see https://github.com/traefik/traefik-helm-chart/pull/1029
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            # see https://github.com/kubernetes/kubernetes/blob/master/test/e2e/common/downward_api.go
+            - name: POD_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: web
+              containerPort: 8000
+          resources:
+            requests:
+              memory: 20Mi
+              cpu: '0.1'
+            limits:
+              memory: 20Mi
+              cpu: '0.1'
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: tokens
+              readOnly: true
+              mountPath: /var/run/secrets/tokens
+      volumes:
+        - name: tokens
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: example.com-jwt.txt
+                  audience: example.com
+                  # NB the kubelet will periodically rotate this token.
+                  # NB the token is rotated when its older than 80% of its time
+                  #    to live or if the token is older than 24h.
+                  # NB in production, set to a higher value (e.g. 3600 (1h)).
+                  # NB the minimum allowed value is 600 (10m).
+                  # NB this is equivalent of using the TokenRequest API.
+                  #    see https://kubernetes.io/docs/reference/kubernetes-api/authentication-resources/token-request-v1/
+                  # NB this is equivalent of executing:
+                  #       kubectl create token kubernetes-hello --audience example.com --duration 600s
+                  #    see https://kubernetes.io/docs/reference/kubectl/generated/kubectl_create/kubectl_create_token/
+                  expirationSeconds: 600

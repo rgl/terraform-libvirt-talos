@@ -10,6 +10,12 @@ An example [Talos Linux](https://www.talos.dev) Kubernetes cluster in libvirt QE
 
 The [spin extension](https://github.com/siderolabs/extensions/tree/main/container-runtime/spin), which installs [containerd-shim-spin](https://github.com/spinkube/containerd-shim-spin), is used to provide the ability to run [Spin Applications](https://developer.fermyon.com/spin/v2/index) ([WebAssembly/Wasm](https://webassembly.org/)).
 
+[Zot](https://github.com/project-zot/zot) is used as the in-cluster container registry. It stores and manages container images and other OCI artifacts.
+
+[Gitea](https://github.com/go-gitea/gitea) is used as the in-cluster git repository manager.
+
+[Argo CD](https://github.com/argoproj/argo-cd) is used as the in-cluster continuous delivery tool (aka gitops).
+
 # Usage (Ubuntu 22.04 host)
 
 Install libvirt:
@@ -249,6 +255,67 @@ echo "$example_spin_ip $example_spin_fqdn" | sudo tee -a /etc/hosts
 curl "$example_spin_url"
 xdg-open "$example_spin_url"
 kubectl delete -f example-spin.yml
+```
+
+Access Zot:
+
+```bash
+export KUBECONFIG=$PWD/kubeconfig.yml
+export SSL_CERT_FILE="$PWD/kubernetes-ingress-ca-crt.pem"
+zot_ip="$(kubectl get -n zot ingress/zot -o json | jq -r .status.loadBalancer.ingress[0].ip)"
+zot_fqdn="$(kubectl get -n zot ingress/zot -o json | jq -r .spec.rules[0].host)"
+zot_url="https://$zot_fqdn"
+echo "zot_url: $zot_url"
+echo "zot_username: admin"
+echo "zot_password: admin"
+curl --resolve "$zot_fqdn:443:$zot_ip" "$zot_url"
+echo "$zot_ip $zot_fqdn" | sudo tee -a /etc/hosts
+xdg-open "$zot_url"
+```
+
+Upload the `kubernetes-hello` example image:
+
+```bash
+skopeo login \
+  --username admin \
+  --password-stdin \
+  "$zot_fqdn" \
+  <<<"admin"
+skopeo copy \
+  --format oci \
+  docker://docker.io/ruilopes/kubernetes-hello:v0.0.202408161942 \
+  "docker://$zot_fqdn/ruilopes/kubernetes-hello:v0.0.202408161942"
+skopeo logout "$zot_fqdn"
+```
+
+Inspect the `kubernetes-hello` example image:
+
+```bash
+skopeo login \
+  --username talos \
+  --password-stdin \
+  "$zot_fqdn" \
+  <<<"talos"
+skopeo list-tags "docker://$zot_fqdn/ruilopes/kubernetes-hello"
+skopeo inspect "docker://$zot_fqdn/ruilopes/kubernetes-hello:v0.0.202408161942"
+skopeo inspect "docker://$zot_fqdn/ruilopes/kubernetes-hello:v0.0.202408161942" \
+  --raw | jq
+skopeo logout "$zot_fqdn"
+```
+
+Launch a Pod using the example image:
+
+```bash
+kubectl apply -f kubernetes-hello.yml
+kubectl rollout status deployment/kubernetes-hello
+kubectl get ingresses,services,pods,deployments
+kubernetes_hello_ip="$(kubectl get ingress/kubernetes-hello -o json | jq -r .status.loadBalancer.ingress[0].ip)"
+kubernetes_hello_fqdn="$(kubectl get ingress/kubernetes-hello -o json | jq -r .spec.rules[0].host)"
+kubernetes_hello_url="http://$kubernetes_hello_fqdn"
+echo "kubernetes_hello_url: $kubernetes_hello_url"
+curl --resolve "$kubernetes_hello_fqdn:80:$kubernetes_hello_ip" "$kubernetes_hello_url"
+echo "$kubernetes_hello_ip $kubernetes_hello_fqdn" | sudo tee -a /etc/hosts
+xdg-open "$kubernetes_hello_url"
 ```
 
 Access Gitea:

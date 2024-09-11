@@ -26,6 +26,11 @@ locals {
           enabled = true
           port    = 7445
         }
+        # see https://www.talos.dev/v1.7/talos-guides/network/host-dns/
+        hostDNS = {
+          enabled              = true
+          forwardKubeDNSToHost = true
+        }
       }
       kernel = {
         modules = [
@@ -40,6 +45,33 @@ locals {
             name = "drbd_transport_tcp"
           },
         ]
+      }
+      network = {
+        extraHostEntries = [
+          {
+            ip = local.zot_cluster_ip
+            aliases = [
+              local.zot_cluster_domain,
+            ]
+          }
+        ]
+      }
+      registries = {
+        config = {
+          (local.zot_cluster_host) = {
+            auth = {
+              username = "talos"
+              password = "talos"
+            }
+          }
+        }
+        mirrors = {
+          (local.zot_cluster_host) = {
+            endpoints = [
+              local.zot_cluster_url,
+            ]
+          }
+        }
       }
     }
     cluster = {
@@ -142,6 +174,10 @@ data "talos_machine_configuration" "controller" {
           {
             name     = "reloader"
             contents = data.helm_template.reloader.manifest
+          },
+          {
+            name     = "zot"
+            contents = local.zot_manifest
           },
           {
             name     = "gitea"
