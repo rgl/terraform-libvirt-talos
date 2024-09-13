@@ -1,6 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+# the talos image builder. one of:
+#   imager: build locally using the ghcr.io/siderolabs/imager container image.
+#   image_factory: build remotely using the image factory service at https://factory.talos.dev.
+talos_image_builder="image_factory"
+
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
 talos_version="1.7.6"
@@ -58,7 +63,7 @@ function update-talos-extensions {
   update-talos-extension talos_spin_extension_tag ghcr.io/siderolabs/spin "$images"
 }
 
-function build_talos_image {
+function build_talos_image__imager {
   # see https://www.talos.dev/v1.7/talos-guides/install/boot-assets/
   # see https://www.talos.dev/v1.7/advanced/metal-network-configuration/
   # see Profile type at https://github.com/siderolabs/talos/blob/v1.7.6/pkg/imager/profile/profile.go#L22-L45
@@ -91,7 +96,7 @@ output:
     diskFormat: raw
   outFormat: raw
 EOF
-  local talos_libvirt_base_volume_name="talos-$talos_version.qcow2"
+  echo "creating image..."
   docker run --rm -i \
     -v $PWD/tmp/talos:/secureboot:ro \
     -v $PWD/tmp/talos:/out \
@@ -99,11 +104,67 @@ EOF
     --privileged \
     "ghcr.io/siderolabs/imager:$talos_version_tag" \
     - < "tmp/talos/talos-$talos_version.yml"
+}
+
+function build_talos_image__image_factory {
+  # see https://www.talos.dev/v1.7/learn-more/image-factory/
+  # see https://github.com/siderolabs/image-factory?tab=readme-ov-file#http-frontend-api
+  local talos_version_tag="v$talos_version"
+  rm -rf tmp/talos
+  mkdir -p tmp/talos
+  echo "creating image factory schematic..."
+  cat >"tmp/talos/talos-$talos_version.yml" <<EOF
+customization:
+  extraKernelArgs:
+    - net.ifnames=0
+  systemExtensions:
+    officialExtensions:
+      - siderolabs/qemu-guest-agent
+      - siderolabs/drbd
+      - siderolabs/spin
+EOF
+  local schematic_response="$(curl \
+    -X POST \
+    --silent \
+    --data-binary @"tmp/talos/talos-$talos_version.yml" \
+    https://factory.talos.dev/schematics)"
+  local schematic_id="$(jq -r .id <<<"$schematic_response")"
+  if [ -z "$schematic_id" ]; then
+    echo "ERROR: Failed to create the image schematic."
+    exit 1
+  fi
+  local image_url="https://factory.talos.dev/image/$schematic_id/$talos_version_tag/nocloud-amd64.raw.zst"
+  echo "downloading image from $image_url..."
+  rm -f tmp/talos/nocloud-amd64.raw.zst
+  curl \
+    --silent \
+    --output tmp/talos/nocloud-amd64.raw.zst \
+    "$image_url"
+  echo "extracting image..."
+  unzstd tmp/talos/nocloud-amd64.raw.zst
+}
+
+function build_talos_image {
+  case "$talos_image_builder" in
+    imager)
+      build_talos_image__imager
+      ;;
+    image_factory)
+      build_talos_image__image_factory
+      ;;
+    *)
+      echo $"unknown talos_image_builder $talos_image_builder"
+      exit 1
+      ;;
+  esac
+  echo "converting image to the qcow2 format..."
+  local talos_libvirt_base_volume_name="talos-$talos_version.qcow2"
   qemu-img convert -O qcow2 tmp/talos/nocloud-amd64.raw tmp/talos/$talos_libvirt_base_volume_name
   qemu-img info tmp/talos/$talos_libvirt_base_volume_name
   if [ -n "$(virsh vol-list default | grep $talos_libvirt_base_volume_name)" ]; then
     virsh vol-delete --pool default $talos_libvirt_base_volume_name
   fi
+  echo "uploading image to libvirt..."
   virsh vol-create-as default $talos_libvirt_base_volume_name 10M
   virsh vol-upload --pool default $talos_libvirt_base_volume_name tmp/talos/$talos_libvirt_base_volume_name
   cat >terraform.tfvars <<EOF
