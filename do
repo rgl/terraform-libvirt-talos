@@ -8,7 +8,7 @@ talos_image_builder="image_factory"
 
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
-talos_version="1.8.0"
+talos_version="1.8.1"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
 # see https://github.com/siderolabs/extensions/tree/main/guest-agents/qemu-guest-agent
@@ -17,7 +17,7 @@ talos_qemu_guest_agent_extension_tag="9.1.0@sha256:cd8154036a0711f6f0a2ec9d6ce85
 # see https://github.com/siderolabs/extensions/pkgs/container/drbd
 # see https://github.com/siderolabs/extensions/tree/main/storage/drbd
 # see https://github.com/LINBIT/drbd
-talos_drbd_extension_tag="9.2.11-v1.8.0@sha256:e58f07bdc0184a075f1b7e1864ca2c6487b96c5a848d24440162fcff3eb45d96"
+talos_drbd_extension_tag="9.2.11-v1.8.1@sha256:f4186835e9320d4657ee791d4e17cda73f5e3422837f88a5689d44671550cf1f"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/spin
 # see https://github.com/siderolabs/extensions/tree/main/container-runtime/spin
@@ -66,7 +66,7 @@ function update-talos-extensions {
 function build_talos_image__imager {
   # see https://www.talos.dev/v1.8/talos-guides/install/boot-assets/
   # see https://www.talos.dev/v1.8/advanced/metal-network-configuration/
-  # see Profile type at https://github.com/siderolabs/talos/blob/v1.8.0/pkg/imager/profile/profile.go#L24-L47
+  # see Profile type at https://github.com/siderolabs/talos/blob/v1.8.1/pkg/imager/profile/profile.go#L24-L47
   local talos_version_tag="v$talos_version"
   rm -rf tmp/talos
   mkdir -p tmp/talos
