@@ -1,10 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
-# the talos image builder. one of:
+# the talos image builder.
+# NB this can be one of:
 #   imager: build locally using the ghcr.io/siderolabs/imager container image.
 #   image_factory: build remotely using the image factory service at https://factory.talos.dev.
-talos_image_builder="image_factory"
+# NB this is automatically set to imager when running on linux 6.1+; otherwise,
+#    it is set to image_factory.
+talos_image_builder="$(perl -e 'print ((`uname -r` =~ /^(\d+\.\d+)/ && $1 >= 6.1) ? "imager" : "image_factory")')"
 
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
