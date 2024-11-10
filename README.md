@@ -77,7 +77,7 @@ Install kubectl-linstor:
 #    kubectl -n piraeus-datastore exec deploy/linstor-controller -- linstor storage-pool list
 # see https://github.com/piraeusdatastore/kubectl-linstor/releases
 # renovate: datasource=github-releases depName=piraeusdatastore/kubectl-linstor
-kubectl_linstor_version='0.3.0'
+kubectl_linstor_version='0.3.1'
 kubectl_linstor_url="https://github.com/piraeusdatastore/kubectl-linstor/releases/download/v${kubectl_linstor_version}/kubectl-linstor_v${kubectl_linstor_version}_linux_amd64.tar.gz"
 wget -O- "$kubectl_linstor_url" | tar xzf - kubectl-linstor
 sudo install kubectl-linstor /usr/local/bin/kubectl-linstor
