@@ -26,7 +26,7 @@ locals {
           enabled = true
           port    = 7445
         }
-        # see https://www.talos.dev/v1.7/talos-guides/network/host-dns/
+        # see https://www.talos.dev/v1.8/talos-guides/network/host-dns/
         hostDNS = {
           enabled              = true
           forwardKubeDNSToHost = true
