@@ -29,15 +29,15 @@ variable "cluster_name" {
 }
 
 variable "cluster_vip" {
-  description = "A name to provide for the Talos cluster"
+  description = "The virtual IP (VIP) address of the Kubernetes API server. Ensure it is synchronized with the 'cluster_endpoint' variable."
   type        = string
   default     = "10.17.3.9"
 }
 
 variable "cluster_endpoint" {
-  description = "The k8s api-server (VIP) endpoint"
+  description = "The virtual IP (VIP) endpoint of the Kubernetes API server. Ensure it is synchronized with the 'cluster_vip' variable."
   type        = string
-  default     = "https://10.17.3.9:6443" # k8s api-server endpoint.
+  default     = "https://10.17.3.9:6443"
 }
 
 variable "cluster_node_network" {
