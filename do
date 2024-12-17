@@ -11,20 +11,20 @@ talos_image_builder="$(perl -e 'print ((`uname -r` =~ /^(\d+\.\d+)/ && $1 >= 6.1
 
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
-talos_version="1.8.3"
+talos_version="1.8.4"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
 # see https://github.com/siderolabs/extensions/tree/main/guest-agents/qemu-guest-agent
-talos_qemu_guest_agent_extension_tag="9.1.0@sha256:cd8154036a0711f6f0a2ec9d6ce8539219d0e46a78e0eca22598d4d884f3f52c"
+talos_qemu_guest_agent_extension_tag="9.1.0@sha256:423ca224cae8fba1e278996e83d40317dbd8863e0bbb0e6bcf5bb04bdc416717"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/drbd
 # see https://github.com/siderolabs/extensions/tree/main/storage/drbd
 # see https://github.com/LINBIT/drbd
-talos_drbd_extension_tag="9.2.11-v1.8.3@sha256:4fab47f31d7e7d1873cc17fc46225805a424234eac73e5ff61b22419b9a496fc"
+talos_drbd_extension_tag="9.2.11-v1.8.4@sha256:bfb643094b7578c3eabb35224daad091179dc78ce5cb96fdde6fe08327ae0629"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/spin
 # see https://github.com/siderolabs/extensions/tree/main/container-runtime/spin
-talos_spin_extension_tag="v0.15.1@sha256:642488eadb94d4ddb30f9e65d8ed6836a4c00d699889e060019492308735af9b"
+talos_spin_extension_tag="v0.15.1@sha256:a0cee06a768e436d93ac98b2c2e1126a01df11f5c96b87686d38b1049e5bd119"
 
 # see https://github.com/piraeusdatastore/piraeus-operator/releases
 # renovate: datasource=github-releases depName=piraeusdatastore/piraeus-operator
