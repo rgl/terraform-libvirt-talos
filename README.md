@@ -89,7 +89,7 @@ Install talosctl:
 ```bash
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
-talos_version='1.8.4'
+talos_version='1.9.0'
 wget https://github.com/siderolabs/talos/releases/download/v$talos_version/talosctl-linux-amd64
 sudo install talosctl-linux-amd64 /usr/local/bin/talosctl
 rm talosctl-linux-amd64
@@ -506,7 +506,7 @@ Update the talos extensions to match the talos version:
 Talos:
 
 ```bash
-# see https://www.talos.dev/v1.8/advanced/troubleshooting-control-plane/
+# see https://www.talos.dev/v1.9/advanced/troubleshooting-control-plane/
 talosctl -n $all support && rm -rf support && 7z x -osupport support.zip && code support
 talosctl -n $c0 service ext-qemu-guest-agent status
 talosctl -n $c0 service etcd status
@@ -519,8 +519,10 @@ talosctl -n $c0 inspect dependencies | dot -Tsvg >c0.svg && xdg-open c0.svg
 talosctl -n $c0 dashboard
 talosctl -n $c0 logs controller-runtime
 talosctl -n $c0 logs kubelet
-talosctl -n $c0 disks
 talosctl -n $c0 mounts | sort
+talosctl -n $c0 get blockdevices
+talosctl -n $c0 get disks
+talosctl -n $c0 get systemdisk
 talosctl -n $c0 get resourcedefinitions
 talosctl -n $c0 get machineconfigs -o yaml
 talosctl -n $c0 get staticpods -o yaml
