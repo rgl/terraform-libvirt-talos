@@ -1,4 +1,4 @@
-# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.1/website/docs/r/network.markdown
+# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.3/website/docs/r/network.markdown
 resource "libvirt_network" "talos" {
   name      = var.prefix
   mode      = "nat"
@@ -13,7 +13,7 @@ resource "libvirt_network" "talos" {
   }
 }
 
-# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.1/website/docs/r/volume.html.markdown
+# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.3/website/docs/r/volume.html.markdown
 resource "libvirt_volume" "controller" {
   count            = var.controller_count
   name             = "${var.prefix}_c${count.index}.img"
@@ -22,7 +22,7 @@ resource "libvirt_volume" "controller" {
   size             = 40 * 1024 * 1024 * 1024 # 40GiB.
 }
 
-# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.1/website/docs/r/volume.html.markdown
+# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.3/website/docs/r/volume.html.markdown
 resource "libvirt_volume" "worker" {
   count            = var.worker_count
   name             = "${var.prefix}_w${count.index}.img"
@@ -31,7 +31,7 @@ resource "libvirt_volume" "worker" {
   size             = 40 * 1024 * 1024 * 1024 # 40GiB.
 }
 
-# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.1/website/docs/r/volume.html.markdown
+# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.3/website/docs/r/volume.html.markdown
 resource "libvirt_volume" "worker_data0" {
   count  = var.worker_count
   name   = "${var.prefix}_w${count.index}d0.img"
@@ -39,7 +39,7 @@ resource "libvirt_volume" "worker_data0" {
   size   = 32 * 1024 * 1024 * 1024 # 32GiB.
 }
 
-# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.1/website/docs/r/domain.html.markdown
+# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.3/website/docs/r/domain.html.markdown
 resource "libvirt_domain" "controller" {
   count      = var.controller_count
   name       = "${var.prefix}_${local.controller_nodes[count.index].name}"
@@ -72,7 +72,7 @@ resource "libvirt_domain" "controller" {
   }
 }
 
-# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.1/website/docs/r/domain.html.markdown
+# see https://github.com/dmacvicar/terraform-provider-libvirt/blob/v0.8.3/website/docs/r/domain.html.markdown
 resource "libvirt_domain" "worker" {
   count      = var.worker_count
   name       = "${var.prefix}_${local.worker_nodes[count.index].name}"
