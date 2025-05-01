@@ -11,20 +11,20 @@ talos_image_builder="$(perl -e 'print ((`uname -r` =~ /^(\d+\.\d+)/ && $1 >= 6.1
 
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
-talos_version="1.9.1"
+talos_version="1.9.5"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
 # see https://github.com/siderolabs/extensions/tree/main/guest-agents/qemu-guest-agent
-talos_qemu_guest_agent_extension_tag="9.1.2@sha256:d601efce65544bd3f8617d0e4b355e1131563e120dd63225037526254ce3196f"
+talos_qemu_guest_agent_extension_tag="9.2.0@sha256:00359da7b382d4d802841c0d5c9e3e89410574d1edda3ac3f892b73c5cb6b795"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/drbd
 # see https://github.com/siderolabs/extensions/tree/main/storage/drbd
 # see https://github.com/LINBIT/drbd
-talos_drbd_extension_tag="9.2.12-v1.9.1@sha256:54968d9481ed6f7af353ea233d035898e4dfff378206d04948546c76452707c7"
+talos_drbd_extension_tag="9.2.12-v1.9.5@sha256:6bcdae6d6ce41ea13e13ecdd113d8ad34b478aff45399d941d1815bf97593346"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/spin
 # see https://github.com/siderolabs/extensions/tree/main/container-runtime/spin
-talos_spin_extension_tag="v0.17.0@sha256:90dc7ea8260caadbdf17513d87a6a834869ec4021bc9d190d4f5f21911ce8dd7"
+talos_spin_extension_tag="v0.18.0@sha256:93045d3e1f13ddccf4e5cebdff35a00521d26c5166a346cfc5056d6ca3954092"
 
 # see https://github.com/piraeusdatastore/piraeus-operator/releases
 # renovate: datasource=github-releases depName=piraeusdatastore/piraeus-operator
@@ -69,7 +69,7 @@ function update-talos-extensions {
 function build_talos_image__imager {
   # see https://www.talos.dev/v1.9/talos-guides/install/boot-assets/
   # see https://www.talos.dev/v1.9/advanced/metal-network-configuration/
-  # see Profile type at https://github.com/siderolabs/talos/blob/v1.9.1/pkg/imager/profile/profile.go#L24-L47
+  # see Profile type at https://github.com/siderolabs/talos/blob/v1.9.5/pkg/imager/profile/profile.go#L24-L47
   local talos_version_tag="v$talos_version"
   rm -rf tmp/talos
   mkdir -p tmp/talos

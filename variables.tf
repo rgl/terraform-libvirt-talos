@@ -3,7 +3,7 @@
 variable "talos_version" {
   type = string
   # renovate: datasource=github-releases depName=siderolabs/talos
-  default = "1.9.1"
+  default = "1.9.5"
   validation {
     condition     = can(regex("^\\d+(\\.\\d+)+", var.talos_version))
     error_message = "Must be a version number."
@@ -102,7 +102,7 @@ variable "worker_count" {
 
 variable "talos_libvirt_base_volume_name" {
   type    = string
-  default = "talos-1.9.1.qcow2"
+  default = "talos-1.9.5.qcow2"
   validation {
     condition     = can(regex(".+\\.qcow2+$", var.talos_libvirt_base_volume_name))
     error_message = "Must be a name with a .qcow2 extension."
