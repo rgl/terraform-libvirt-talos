@@ -318,6 +318,12 @@ echo "$kubernetes_hello_ip $kubernetes_hello_fqdn" | sudo tee -a /etc/hosts
 xdg-open "$kubernetes_hello_url"
 ```
 
+Delete the example Pod:
+
+```bash
+kubectl delete -f kubernetes-hello.yml
+```
+
 Access Gitea:
 
 ```bash
