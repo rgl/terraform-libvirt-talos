@@ -53,7 +53,7 @@ locals {
 
 # set the configuration.
 # NB the default values are described at:
-#       https://github.com/project-zot/helm-charts/tree/zot-0.1.68/charts/zot/values.yaml
+#       https://github.com/project-zot/helm-charts/tree/zot-0.1.70/charts/zot/values.yaml
 #    NB make sure you are seeing the same version of the chart that you are installing.
 # see https://zotregistry.dev/v2.1.0/install-guides/install-guide-k8s/
 # see https://registry.terraform.io/providers/hashicorp/helm/latest/docs/data-sources/template
@@ -64,7 +64,7 @@ data "helm_template" "zot" {
   chart      = "zot"
   # see https://artifacthub.io/packages/helm/zot/zot
   # renovate: datasource=helm depName=zot registryUrl=https://zotregistry.dev/helm-charts
-  version      = "0.1.68" # app version 2.1.2.
+  version      = "0.1.70" # app version 2.1.2.
   kube_version = var.kubernetes_version
   api_versions = []
   values = [yamlencode({
