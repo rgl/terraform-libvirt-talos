@@ -89,7 +89,7 @@ Install talosctl:
 ```bash
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
-talos_version='1.9.6'
+talos_version='1.10.3'
 wget https://github.com/siderolabs/talos/releases/download/v$talos_version/talosctl-linux-amd64
 sudo install talosctl-linux-amd64 /usr/local/bin/talosctl
 rm talosctl-linux-amd64
@@ -408,7 +408,6 @@ popd
 Create the `argocd-example` argocd application:
 
 ```bash
-# TODO why are each of these argocd commands taking ~20s to complete?
 argocd login \
   "$argocd_server_fqdn" \
   --username admin \
@@ -512,7 +511,7 @@ Update the talos extensions to match the talos version:
 Talos:
 
 ```bash
-# see https://www.talos.dev/v1.9/advanced/troubleshooting-control-plane/
+# see https://www.talos.dev/v1.10/advanced/troubleshooting-control-plane/
 talosctl -n $all support && rm -rf support && 7z x -osupport support.zip && code support
 talosctl -n $c0 service ext-qemu-guest-agent status
 talosctl -n $c0 service etcd status
