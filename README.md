@@ -335,7 +335,7 @@ gitea_url="https://$gitea_fqdn"
 echo "gitea_url: $gitea_url"
 echo "gitea_username: gitea"
 echo "gitea_password: gitea"
-curl --resolve "$gitea_fqdn:443:$gitea_ip" "$gitea_url"
+curl --resolve "$gitea_fqdn:443:$gitea_ip" --silent "$gitea_url" | grep -P '<title>'
 echo "$gitea_ip $gitea_fqdn" | sudo tee -a /etc/hosts
 xdg-open "$gitea_url"
 ```
