@@ -1,13 +1,13 @@
 ---
 # see https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
-# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#serviceaccount-v1-core
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#serviceaccount-v1-core
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: kubernetes-hello
 ---
 # see https://kubernetes.io/docs/reference/access-authn-authz/rbac/
-# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#role-v1-rbac-authorization-k8s-io
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#role-v1-rbac-authorization-k8s-io
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -18,7 +18,7 @@ rules:
     verbs: ["get", "list"]
 ---
 # see https://kubernetes.io/docs/reference/access-authn-authz/rbac/
-# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#rolebinding-v1-rbac-authorization-k8s-io
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#rolebinding-v1-rbac-authorization-k8s-io
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -32,7 +32,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 # see https://kubernetes.io/docs/concepts/services-networking/ingress/
-# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#ingress-v1-networking-k8s-io
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#ingress-v1-networking-k8s-io
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -51,8 +51,8 @@ spec:
                   name: web
 ---
 # see https://kubernetes.io/docs/concepts/services-networking/service/#type-clusterip
-# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#service-v1-core
-# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#serviceport-v1-core
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#service-v1-core
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#serviceport-v1-core
 apiVersion: v1
 kind: Service
 metadata:
@@ -68,9 +68,9 @@ spec:
       targetPort: web
 ---
 # see https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
-# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#deployment-v1-apps
-# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#podtemplatespec-v1-core
-# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#container-v1-core
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#deployment-v1-apps
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podtemplatespec-v1-core
+# see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#container-v1-core
 apiVersion: apps/v1
 kind: Deployment
 metadata:
