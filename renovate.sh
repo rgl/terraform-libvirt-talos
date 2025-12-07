@@ -18,7 +18,7 @@ gitea_version='1.24.6'
 # see https://hub.docker.com/r/renovate/renovate/tags
 # see https://github.com/renovatebot/renovate/releases
 # renovate: datasource=docker depName=renovate/renovate
-renovate_version='41.135.3'
+renovate_version='42.37.1'
 
 # clean.
 echo 'Deleting existing Gitea...'
@@ -172,7 +172,10 @@ docker run \
   "renovate/renovate:$renovate_version" \
   --platform=gitea \
   --git-url=endpoint \
-  >tmp/renovate-log.json
+  >tmp/renovate-log.txt
+ grep -E '^{' \
+    tmp/renovate-log.txt \
+    >tmp/renovate-log.json
 
 echo 'Getting results...'
 # extract the errors.
