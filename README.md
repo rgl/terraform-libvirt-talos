@@ -89,7 +89,7 @@ Install talosctl:
 ```bash
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
-talos_version='1.11.6'
+talos_version='1.12.1'
 wget https://github.com/siderolabs/talos/releases/download/v$talos_version/talosctl-linux-amd64
 sudo install talosctl-linux-amd64 /usr/local/bin/talosctl
 rm talosctl-linux-amd64
@@ -511,7 +511,7 @@ Update the talos extensions to match the talos version:
 Talos:
 
 ```bash
-# see https://www.talos.dev/v1.11/advanced/troubleshooting-control-plane/
+# see https://docs.siderolabs.com/talos/v1.12/troubleshooting/troubleshooting
 talosctl -n $all support && rm -rf support && 7z x -osupport support.zip && code support
 talosctl -n $c0 service ext-qemu-guest-agent status
 talosctl -n $c0 service etcd status
@@ -525,6 +525,7 @@ talosctl -n $c0 get members
 talosctl -n $c0 health --control-plane-nodes $controllers --worker-nodes $workers
 talosctl -n $c0 inspect dependencies | dot -Tsvg >c0.svg && xdg-open c0.svg
 talosctl -n $c0 dashboard
+talosctl -n $c0 logs kernel
 talosctl -n $c0 logs controller-runtime
 talosctl -n $c0 logs kubelet
 talosctl -n $c0 mounts | sort
@@ -552,9 +553,11 @@ talosctl -n $w0 read /proc/modules | sort
 talosctl -n $w0 read /sys/module/drbd/parameters/usermode_helper
 talosctl -n $c0 read /etc/os-release
 talosctl -n $c0 read /etc/resolv.conf
+talosctl -n $c0 read /etc/hosts
 talosctl -n $c0 read /etc/containerd/config.toml
 talosctl -n $c0 read /etc/cri/containerd.toml
 talosctl -n $c0 read /etc/cri/conf.d/cri.toml
+talosctl -n $c0 read /etc/cri/conf.d/hosts/zot.zot.svc.cluster.local_5000_/hosts.toml
 talosctl -n $c0 read /etc/kubernetes/kubelet.yaml
 talosctl -n $c0 read /etc/kubernetes/kubeconfig-kubelet
 talosctl -n $c0 read /etc/kubernetes/bootstrap-kubeconfig
