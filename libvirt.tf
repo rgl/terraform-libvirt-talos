@@ -45,7 +45,7 @@ resource "libvirt_domain" "controller" {
   name       = "${var.prefix}_${local.controller_nodes[count.index].name}"
   qemu_agent = false
   machine    = "q35"
-  firmware   = "/usr/share/OVMF/OVMF_CODE.fd"
+  firmware   = "/usr/share/OVMF/OVMF_CODE_4M.fd"
   cpu {
     mode = "host-passthrough"
   }
@@ -78,7 +78,7 @@ resource "libvirt_domain" "worker" {
   name       = "${var.prefix}_${local.worker_nodes[count.index].name}"
   qemu_agent = false
   machine    = "q35"
-  firmware   = "/usr/share/OVMF/OVMF_CODE.fd"
+  firmware   = "/usr/share/OVMF/OVMF_CODE_4M.fd"
   cpu {
     mode = "host-passthrough"
   }

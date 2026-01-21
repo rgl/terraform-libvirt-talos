@@ -16,7 +16,7 @@ The [spin extension](https://github.com/siderolabs/extensions/tree/main/containe
 
 [Argo CD](https://github.com/argoproj/argo-cd) is used as the in-cluster continuous delivery tool (aka gitops).
 
-# Usage (Ubuntu 22.04 host)
+# Usage (Ubuntu 24.04 host)
 
 Install libvirt:
 
