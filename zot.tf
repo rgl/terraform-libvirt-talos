@@ -178,7 +178,7 @@ data "kustomizer_manifest" "zot" {
       namespace: ${yamlencode(local.zot_namespace)}
       resources:
         - resources/resources.yaml
-    EOF
+      EOF
     "resources/resources.yaml" = data.helm_template.zot.manifest
   }
 }

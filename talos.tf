@@ -144,12 +144,12 @@ data "talos_machine_configuration" "controller" {
             {
               name     = "spin"
               contents = <<-EOF
-            apiVersion: node.k8s.io/v1
-            kind: RuntimeClass
-            metadata:
-              name: wasmtime-spin-v2
-            handler: spin
-            EOF
+                apiVersion: node.k8s.io/v1
+                kind: RuntimeClass
+                metadata:
+                  name: wasmtime-spin-v2
+                handler: spin
+                EOF
             },
             {
               name = "cilium"
