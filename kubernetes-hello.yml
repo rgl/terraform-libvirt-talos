@@ -87,27 +87,38 @@ spec:
     spec:
       serviceAccountName: kubernetes-hello
       enableServiceLinks: false
+      securityContext:
+        # NB this group id has to be the same as the container user group id(s)
+        #    securityContext, which is inferred by k8s from the USER Dockerfile
+        #    instruction.
+        fsGroup: 65534
       containers:
         # see https://github.com/rgl/kubernetes-hello
         - name: kubernetes-hello
-          image: zot.zot.svc.cluster.local:5000/ruilopes/kubernetes-hello:v0.0.202408161942
+          image: zot.zot.svc.cluster.local:5000/ruilopes/kubernetes-hello:v0.0.202601313131
           env:
             # configure the go runtime to honor the k8s memory and cpu resource
             # limits.
+            # NB since go 1.19.0 this is now automatically handled by the go
+            #    runtime.
             # NB resourceFieldRef will cast the limits to bytes and integer
             #    number of cpus (rounding up to the nearest integer).
             # see https://pkg.go.dev/runtime
             # see https://www.riverphillips.dev/blog/go-cfs/
             # see https://github.com/golang/go/issues/33803
             # see https://github.com/traefik/traefik-helm-chart/pull/1029
-            - name: GOMEMLIMIT
-              valueFrom:
-                resourceFieldRef:
-                  resource: limits.memory
-            - name: GOMAXPROCS
-              valueFrom:
-                resourceFieldRef:
-                  resource: limits.cpu
+            # - name: GOMEMLIMIT
+            #   valueFrom:
+            #     resourceFieldRef:
+            #       resource: limits.memory
+            # NB since go 1.25.0 this is now automatically handled by the go
+            #    runtime. thou, when the limit is < 2, it uses 2.
+            #    see https://go.dev/doc/go1.25#container-aware-gomaxprocs
+            #    see https://github.com/golang/go/blob/go1.25.6/src/runtime/cgroup_linux.go#L11-L26
+            # - name: GOMAXPROCS
+            #   valueFrom:
+            #     resourceFieldRef:
+            #       resource: limits.cpu
             # see https://github.com/kubernetes/kubernetes/blob/master/test/e2e/common/downward_api.go
             - name: POD_UID
               valueFrom:
@@ -126,11 +137,11 @@ spec:
               containerPort: 8000
           resources:
             requests:
-              memory: 20Mi
-              cpu: '0.1'
+              memory: 64Mi
+              cpu: '0.5'
             limits:
-              memory: 20Mi
-              cpu: '0.1'
+              memory: 64Mi
+              cpu: '0.5'
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

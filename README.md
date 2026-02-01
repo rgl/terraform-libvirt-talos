@@ -283,8 +283,8 @@ skopeo login \
   <<<"admin"
 skopeo copy \
   --format oci \
-  docker://docker.io/ruilopes/kubernetes-hello:v0.0.202408161942 \
-  "docker://$zot_fqdn/ruilopes/kubernetes-hello:v0.0.202408161942"
+  docker://docker.io/ruilopes/kubernetes-hello:v0.0.202601313131 \
+  "docker://$zot_fqdn/ruilopes/kubernetes-hello:v0.0.202601313131"
 skopeo logout "$zot_fqdn"
 ```
 
@@ -297,8 +297,8 @@ skopeo login \
   "$zot_fqdn" \
   <<<"talos"
 skopeo list-tags "docker://$zot_fqdn/ruilopes/kubernetes-hello"
-skopeo inspect "docker://$zot_fqdn/ruilopes/kubernetes-hello:v0.0.202408161942"
-skopeo inspect "docker://$zot_fqdn/ruilopes/kubernetes-hello:v0.0.202408161942" \
+skopeo inspect "docker://$zot_fqdn/ruilopes/kubernetes-hello:v0.0.202601313131"
+skopeo inspect "docker://$zot_fqdn/ruilopes/kubernetes-hello:v0.0.202601313131" \
   --raw | jq
 skopeo logout "$zot_fqdn"
 ```
