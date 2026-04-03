@@ -11,20 +11,20 @@ talos_image_builder="$(perl -e 'print ((`uname -r` =~ /^(\d+\.\d+)/ && $1 >= 6.1
 
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
-talos_version="1.12.4"
+talos_version="1.12.6"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
 # see https://github.com/siderolabs/extensions/tree/main/guest-agents/qemu-guest-agent
-talos_qemu_guest_agent_extension_tag="10.2.0@sha256:ae6ca226e7b66abdd072780408fc24b554c7c41fd2397826cf85a301133a776e"
+talos_qemu_guest_agent_extension_tag="10.2.0@sha256:639b69cfe5833f6bfacde935ca3d29e4c1706ab32b91f9617b10fbaac7699b74"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/drbd
 # see https://github.com/siderolabs/extensions/tree/main/storage/drbd
 # see https://github.com/LINBIT/drbd
-talos_drbd_extension_tag="9.2.16-v1.12.4@sha256:d04e38f303a797802ef32035af8cb1127487858fa5edfb67b19d1a7c84e87159"
+talos_drbd_extension_tag="9.2.16-v1.12.6@sha256:f524139c5be4626d7f2b6bd47745ce93648f3f1ab2b681fb00f8ab97ec2c19a3"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/spin
 # see https://github.com/siderolabs/extensions/tree/main/container-runtime/spin
-talos_spin_extension_tag="v0.22.0@sha256:2ad789021ba168a868db3cbf4e8c33038678603aef11912044c084a3ff608523"
+talos_spin_extension_tag="v0.23.0@sha256:45ea836e6dc3d3d09f58c47c3129b2436c1e7b88b3b33f03662e19c85fe6356e"
 
 # see https://github.com/piraeusdatastore/piraeus-operator/releases
 # renovate: datasource=github-releases depName=piraeusdatastore/piraeus-operator
@@ -75,7 +75,7 @@ function update-talos-extensions {
 function build_talos_image__imager {
   # see https://docs.siderolabs.com/talos/v1.12/platform-specific-installations/boot-assets
   # see https://docs.siderolabs.com/talos/v1.12/platform-specific-installations/bare-metal-platforms/network-config
-  # see Profile type at https://github.com/siderolabs/talos/blob/v1.12.4/pkg/imager/profile/profile.go#L24-L47
+  # see Profile type at https://github.com/siderolabs/talos/blob/v1.12.6/pkg/imager/profile/profile.go#L24-L47
   local talos_version_tag="v$talos_version"
   rm -rf tmp/talos
   mkdir -p tmp/talos
