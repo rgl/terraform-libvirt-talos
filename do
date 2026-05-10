@@ -11,16 +11,16 @@ talos_image_builder="$(perl -e 'print ((`uname -r` =~ /^(\d+\.\d+)/ && $1 >= 6.1
 
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
-talos_version="1.12.6"
+talos_version="1.12.7"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
 # see https://github.com/siderolabs/extensions/tree/main/guest-agents/qemu-guest-agent
-talos_qemu_guest_agent_extension_tag="10.2.0@sha256:639b69cfe5833f6bfacde935ca3d29e4c1706ab32b91f9617b10fbaac7699b74"
+talos_qemu_guest_agent_extension_tag="10.2.0@sha256:3a34889fcc1023f2b091fe38204387181b44c8d71eea784b41132e4c167f3497"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/drbd
 # see https://github.com/siderolabs/extensions/tree/main/storage/drbd
 # see https://github.com/LINBIT/drbd
-talos_drbd_extension_tag="9.2.16-v1.12.6@sha256:f524139c5be4626d7f2b6bd47745ce93648f3f1ab2b681fb00f8ab97ec2c19a3"
+talos_drbd_extension_tag="9.2.16-v1.12.7@sha256:be407c20d509a1a445310636b0508008a8e5cd8e1532fbd11e5d131ae2fe9dca"
 
 # see https://github.com/siderolabs/extensions/pkgs/container/spin
 # see https://github.com/siderolabs/extensions/tree/main/container-runtime/spin
@@ -75,7 +75,7 @@ function update-talos-extensions {
 function build_talos_image__imager {
   # see https://docs.siderolabs.com/talos/v1.12/platform-specific-installations/boot-assets
   # see https://docs.siderolabs.com/talos/v1.12/platform-specific-installations/bare-metal-platforms/network-config
-  # see Profile type at https://github.com/siderolabs/talos/blob/v1.12.6/pkg/imager/profile/profile.go#L24-L47
+  # see Profile type at https://github.com/siderolabs/talos/blob/v1.12.7/pkg/imager/profile/profile.go#L24-L47
   local talos_version_tag="v$talos_version"
   rm -rf tmp/talos
   mkdir -p tmp/talos
