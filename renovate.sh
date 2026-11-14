@@ -13,7 +13,7 @@ gitea_container_name="$(basename "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")
 
 # see https://hub.docker.com/r/gitea/gitea/tags
 # renovate: datasource=docker depName=gitea/gitea
-gitea_version='1.26.2'
+gitea_version='28.3.0'
 
 # see https://hub.docker.com/r/renovate/renovate/tags
 # see https://github.com/renovatebot/renovate/releases
@@ -28,9 +28,9 @@ rm -f tmp/renovate-*
 install -d tmp
 
 # start gitea in background.
-# see https://docs.gitea.io/en-us/config-cheat-sheet/
+# see https://docs.gitea.com/administration/config-cheat-sheet/
 # see https://github.com/go-gitea/gitea/releases
-# see https://github.com/go-gitea/gitea/blob/v1.26.2/docker/root/etc/s6/gitea/setup
+# see https://github.com/go-gitea/gitea/blob/v28.3.0/docker/root/etc/s6/gitea/setup
 echo 'Starting Gitea...'
 docker run \
     --detach \
@@ -41,7 +41,7 @@ docker run \
     -p 3000 \
     "gitea/gitea:$gitea_version" \
     >/dev/null
-gitea_addr="$(docker port "$gitea_container_name" 3000 | head -1)"
+gitea_addr="$(docker port "$gitea_container_name" 3000 | head -1 | sed 's/0\.0\.0\.0:/127.0.0.1:/')"
 gitea_url="http://$gitea_addr"
 export RENOVATE_ENDPOINT="$gitea_url"
 export GIT_PUSH_REPOSITORY="http://$RENOVATE_USERNAME:$RENOVATE_PASSWORD@$gitea_addr/$RENOVATE_USERNAME/test.git"
@@ -71,9 +71,9 @@ curl \
     > /dev/null
 
 # create the user personal access token.
-# see https://docs.gitea.io/en-us/api-usage/
-# see https://docs.gitea.io/en-us/oauth2-provider/#scopes
-# see https://try.gitea.io/api/swagger#/user/userCreateToken
+# see https://docs.gitea.com/development/api-usage/
+# see https://docs.gitea.com/development/oauth2-provider/#scopes
+# see https://docs.gitea.com/api/operations/user-create-token/
 echo "Creating Gitea $RENOVATE_USERNAME user personal access token..."
 curl \
     --silent \
@@ -82,7 +82,7 @@ curl \
     -u "$RENOVATE_USERNAME:$RENOVATE_PASSWORD" \
     -X POST \
     -H "Content-Type: application/json" \
-    -d '{"name": "renovate", "scopes": ["read:user", "write:issue", "write:repository"]}' \
+    -d '{"name": "renovate", "scopes": ["read:organization", "read:user", "write:issue", "write:repository"]}' \
     "$gitea_url/api/v1/users/$RENOVATE_USERNAME/tokens" \
     | jq -r .sha1 \
     >tmp/renovate-gitea-token.txt
@@ -156,24 +156,24 @@ fi
 # NB use --dry-run=lookup for not modifying the repository (e.g. for not
 #    creating pull requests).
 docker run \
-  --rm \
-  --tty \
-  --interactive \
-  --net host \
-  --env GITHUB_COM_TOKEN \
-  --env RENOVATE_ENDPOINT \
-  --env RENOVATE_TOKEN \
-  --env RENOVATE_REPOSITORIES \
-  --env RENOVATE_PR_HOURLY_LIMIT \
-  --env RENOVATE_PR_CONCURRENT_LIMIT \
-  --env LOG_LEVEL=debug \
-  --env LOG_FORMAT=json \
-  "${docker_extra_args[@]}" \
-  "renovate/renovate:$renovate_version" \
-  --platform=gitea \
-  --git-url=endpoint \
-  >tmp/renovate-log.txt
- grep -E '^{' \
+    --rm \
+    --tty \
+    --interactive \
+    --net host \
+    --env GITHUB_COM_TOKEN \
+    --env RENOVATE_ENDPOINT \
+    --env RENOVATE_TOKEN \
+    --env RENOVATE_REPOSITORIES \
+    --env RENOVATE_PR_HOURLY_LIMIT \
+    --env RENOVATE_PR_CONCURRENT_LIMIT \
+    --env LOG_LEVEL=debug \
+    --env LOG_FORMAT=json \
+    "${docker_extra_args[@]}" \
+    "renovate/renovate:$renovate_version" \
+    --platform=gitea \
+    --git-url=endpoint \
+    >tmp/renovate-log.txt
+grep -E '^{' \
     tmp/renovate-log.txt \
     >tmp/renovate-log.json
 
