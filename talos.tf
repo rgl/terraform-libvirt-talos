@@ -1,13 +1,16 @@
+# see https://en.wikipedia.org/wiki/MAC_address#Ranges_of_group_and_locally_administered_addresses
 locals {
   controller_nodes = [
     for i in range(var.controller_count) : {
       name    = "c${i}"
+      mac     = format("02:00:00:00:01:%02x", var.cluster_node_network_first_controller_hostnum + i)
       address = cidrhost(var.cluster_node_network, var.cluster_node_network_first_controller_hostnum + i)
     }
   ]
   worker_nodes = [
     for i in range(var.worker_count) : {
       name    = "w${i}"
+      mac     = format("02:00:00:00:01:%02x", var.cluster_node_network_first_worker_hostnum + i)
       address = cidrhost(var.cluster_node_network, var.cluster_node_network_first_worker_hostnum + i)
     }
   ]
