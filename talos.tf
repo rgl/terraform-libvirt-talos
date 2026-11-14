@@ -115,12 +115,12 @@ locals {
   ]
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.11.0/docs/resources/machine_secrets
+// see https://registry.terraform.io/providers/siderolabs/talos/0.12.0/docs/resources/machine_secrets
 resource "talos_machine_secrets" "talos" {
   talos_version = "v${var.talos_version}"
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.11.0/docs/data-sources/machine_configuration
+// see https://registry.terraform.io/providers/siderolabs/talos/0.12.0/docs/data-sources/machine_configuration
 data "talos_machine_configuration" "controller" {
   cluster_name       = var.cluster_name
   cluster_endpoint   = var.cluster_endpoint
@@ -211,7 +211,7 @@ data "talos_machine_configuration" "controller" {
   )
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.11.0/docs/data-sources/machine_configuration
+// see https://registry.terraform.io/providers/siderolabs/talos/0.12.0/docs/data-sources/machine_configuration
 data "talos_machine_configuration" "worker" {
   cluster_name       = var.cluster_name
   cluster_endpoint   = var.cluster_endpoint
@@ -224,14 +224,14 @@ data "talos_machine_configuration" "worker" {
   config_patches     = [for c in local.common_machine_configs : yamlencode(c)]
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.11.0/docs/data-sources/client_configuration
+// see https://registry.terraform.io/providers/siderolabs/talos/0.12.0/docs/data-sources/client_configuration
 data "talos_client_configuration" "talos" {
   cluster_name         = var.cluster_name
   client_configuration = talos_machine_secrets.talos.client_configuration
   endpoints            = [for node in local.controller_nodes : node.address]
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.11.0/docs/resources/cluster_kubeconfig
+// see https://registry.terraform.io/providers/siderolabs/talos/0.12.0/docs/resources/cluster_kubeconfig
 resource "talos_cluster_kubeconfig" "talos" {
   client_configuration = talos_machine_secrets.talos.client_configuration
   endpoint             = local.controller_nodes[0].address
@@ -241,7 +241,7 @@ resource "talos_cluster_kubeconfig" "talos" {
   ]
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.11.0/docs/resources/machine_configuration_apply
+// see https://registry.terraform.io/providers/siderolabs/talos/0.12.0/docs/resources/machine_configuration_apply
 resource "talos_machine_configuration_apply" "controller" {
   count                       = var.controller_count
   client_configuration        = talos_machine_secrets.talos.client_configuration
@@ -262,7 +262,7 @@ resource "talos_machine_configuration_apply" "controller" {
   ]
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.11.0/docs/resources/machine_configuration_apply
+// see https://registry.terraform.io/providers/siderolabs/talos/0.12.0/docs/resources/machine_configuration_apply
 resource "talos_machine_configuration_apply" "worker" {
   count                       = var.worker_count
   client_configuration        = talos_machine_secrets.talos.client_configuration
@@ -283,7 +283,7 @@ resource "talos_machine_configuration_apply" "worker" {
   ]
 }
 
-// see https://registry.terraform.io/providers/siderolabs/talos/0.11.0/docs/resources/machine_bootstrap
+// see https://registry.terraform.io/providers/siderolabs/talos/0.12.0/docs/resources/machine_bootstrap
 resource "talos_machine_bootstrap" "talos" {
   client_configuration = talos_machine_secrets.talos.client_configuration
   endpoint             = local.controller_nodes[0].address
