@@ -6,7 +6,7 @@ locals {
     # NB argocd-server will automatically reload this secret.
     # NB alternatively we could set the server.certificate.enabled helm value. but
     #    that does not allow us to fully customize the certificate (e.g. subject).
-    # see https://github.com/argoproj/argo-helm/blob/argo-cd-9.5.19/charts/argo-cd/templates/argocd-server/certificate.yaml
+    # see https://github.com/argoproj/argo-helm/blob/argo-cd-10.18.0/charts/argo-cd/templates/argocd-server/certificate.yaml
     # see https://argo-cd.readthedocs.io/en/stable/operator-manual/tls/
     # see https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.Certificate
     {
@@ -47,7 +47,7 @@ locals {
 
 # set the configuration.
 # NB the default values are described at:
-#       https://github.com/argoproj/argo-helm/blob/argo-cd-9.5.19/charts/argo-cd/values.yaml
+#       https://github.com/argoproj/argo-helm/blob/argo-cd-10.18.0/charts/argo-cd/values.yaml
 #    NB make sure you are seeing the same version of the chart that you are installing.
 # NB this disables the tls between argocd components, that is, the internal
 #    cluster traffic does not uses tls, and only the ingress uses tls.
@@ -64,7 +64,7 @@ data "helm_template" "argocd" {
   chart      = "argo-cd"
   # see https://artifacthub.io/packages/helm/argo/argo-cd
   # renovate: datasource=helm depName=argo-cd registryUrl=https://argoproj.github.io/argo-helm
-  version      = "9.5.19" # app version 3.4.3.
+  version      = "10.18.0" # app version 3.6.1.
   kube_version = var.kubernetes_version
   api_versions = []
   values = [yamlencode({
@@ -74,6 +74,8 @@ data "helm_template" "argocd" {
     configs = {
       params = {
         # disable tls between the argocd components.
+        # see kubectl -n argocd get configmap/argocd-cm -o yaml
+        # see kubectl -n argocd get configmap/argocd-cmd-params-cm -o yaml
         "server.insecure"                                = "true"
         "server.repo.server.plaintext"                   = "true"
         "server.dex.server.plaintext"                    = "true"
@@ -88,6 +90,14 @@ data "helm_template" "argocd" {
         enabled = true
         tls     = true
       }
+    }
+    repoServer = {
+      extraArgs = [
+        # disable the client ca path.
+        # NB required to prevent:
+        #     Error: --client-ca-path cannot be used when --disable-tls is enabled
+        "--client-ca-path=",
+      ]
     }
   })]
 }
