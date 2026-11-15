@@ -1,30 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-# the talos image builder.
-# NB this can be one of:
-#   imager: build locally using the ghcr.io/siderolabs/imager container image.
-#   image_factory: build remotely using the image factory service at https://factory.talos.dev.
-# NB this is automatically set to imager when running on linux 6.1+; otherwise,
-#    it is set to image_factory.
-talos_image_builder="$(perl -e 'print ((`uname -r` =~ /^(\d+\.\d+)/ && $1 >= 6.1) ? "imager" : "image_factory")')"
-
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
-talos_version="1.13.12"
-
-# see https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent
-# see https://github.com/siderolabs/extensions/tree/main/guest-agents/qemu-guest-agent
-talos_qemu_guest_agent_extension_tag="11.0.2@sha256:cde06023aa1812c8d98f0d1e75f48cb5a35bd46c952d34a462c9550e7795c895"
-
-# see https://github.com/siderolabs/extensions/pkgs/container/drbd
-# see https://github.com/siderolabs/extensions/tree/main/storage/drbd
-# see https://github.com/LINBIT/drbd
-talos_drbd_extension_tag="9.3.4-v1.13.12@sha256:2d1b419b703850eeea72e117b7fffeb79cba4f153969b5af6a4446f0cfaefea7"
-
-# see https://github.com/siderolabs/extensions/pkgs/container/spin
-# see https://github.com/siderolabs/extensions/tree/main/container-runtime/spin
-talos_spin_extension_tag="v0.25.1@sha256:fd57e06dc7764fdd2bdc944372dac699217031d0ae42eb2d2cd76d3185f319d2"
+talos_version="1.14.6"
 
 # see https://github.com/piraeusdatastore/piraeus-operator/releases
 # renovate: datasource=github-releases depName=piraeusdatastore/piraeus-operator
@@ -47,74 +26,8 @@ function step {
   echo "### $* ###"
 }
 
-function update-talos-extension {
-  # see https://github.com/siderolabs/extensions?tab=readme-ov-file#installing-extensions
-  local variable_name="$1"
-  local image_name="$2"
-  local images="$3"
-  local image="$(grep -F "$image_name:" <<<"$images")"
-  local tag="${image#*:}"
-  echo "updating the talos extension to $image..."
-  variable_name="$variable_name" tag="$tag" perl -i -pe '
-    BEGIN {
-      $var = $ENV{variable_name};
-      $val = $ENV{tag};
-    }
-    s/^(\Q$var\E=).*/$1"$val"/;
-  ' do
-}
-
-function update-talos-extensions {
-  step "updating the talos extensions"
-  local images="$(crane export "ghcr.io/siderolabs/extensions:v$talos_version" | tar x -O image-digests)"
-  update-talos-extension talos_qemu_guest_agent_extension_tag ghcr.io/siderolabs/qemu-guest-agent "$images"
-  update-talos-extension talos_drbd_extension_tag ghcr.io/siderolabs/drbd "$images"
-  update-talos-extension talos_spin_extension_tag ghcr.io/siderolabs/spin "$images"
-}
-
-function build_talos_image__imager {
-  # see https://docs.siderolabs.com/talos/v1.13/platform-specific-installations/boot-assets
-  # see https://docs.siderolabs.com/talos/v1.13/platform-specific-installations/bare-metal-platforms/network-config
-  # see Profile type at https://github.com/siderolabs/talos/blob/v1.13.12/pkg/imager/profile/profile.go#L24-L50
-  local talos_version_tag="v$talos_version"
-  rm -rf tmp/talos
-  mkdir -p tmp/talos
-  cat >"tmp/talos/talos-$talos_version.yml" <<EOF
-arch: amd64
-platform: nocloud
-secureboot: false
-version: $talos_version_tag
-customization:
-  extraKernelArgs:
-    - net.ifnames=0
-input:
-  kernel:
-    path: /usr/install/amd64/vmlinuz
-  initramfs:
-    path: /usr/install/amd64/initramfs.xz
-  baseInstaller:
-    imageRef: ghcr.io/siderolabs/installer:$talos_version_tag
-  systemExtensions:
-    - imageRef: ghcr.io/siderolabs/qemu-guest-agent:$talos_qemu_guest_agent_extension_tag
-    - imageRef: ghcr.io/siderolabs/drbd:$talos_drbd_extension_tag
-    - imageRef: ghcr.io/siderolabs/spin:$talos_spin_extension_tag
-output:
-  kind: image
-  imageOptions:
-    diskSize: $((2*1024*1024*1024))
-    diskFormat: raw
-  outFormat: raw
-EOF
-  echo "creating image..."
-  docker run --rm -i \
-    -v $PWD/tmp/talos:/secureboot:ro \
-    -v $PWD/tmp/talos:/out \
-    "ghcr.io/siderolabs/imager:$talos_version_tag" \
-    - < "tmp/talos/talos-$talos_version.yml"
-}
-
-function build_talos_image__image_factory {
-  # see https://docs.siderolabs.com/talos/v1.13/learn-more/image-factory
+function build_talos_image {
+  # see https://docs.siderolabs.com/talos/v1.14/learn-more/image-factory
   # see https://github.com/siderolabs/image-factory?tab=readme-ov-file#http-frontend-api
   local talos_version_tag="v$talos_version"
   rm -rf tmp/talos
@@ -140,30 +53,19 @@ EOF
     echo "ERROR: Failed to create the image schematic."
     exit 1
   fi
+  echo "image factory schematic url:"
+  echo "  https://factory.talos.dev/?target=cloud&version=$talos_version_tag&arch=amd64&platform=nocloud&schematic-id=$schematic_id"
   local image_url="https://factory.talos.dev/image/$schematic_id/$talos_version_tag/nocloud-amd64.raw.zst"
   echo "downloading image from $image_url..."
   rm -f tmp/talos/nocloud-amd64.raw.zst
   curl \
     --silent \
+    --show-error \
+    --location \
     --output tmp/talos/nocloud-amd64.raw.zst \
     "$image_url"
   echo "extracting image..."
   unzstd tmp/talos/nocloud-amd64.raw.zst
-}
-
-function build_talos_image {
-  case "$talos_image_builder" in
-    imager)
-      build_talos_image__imager
-      ;;
-    image_factory)
-      build_talos_image__image_factory
-      ;;
-    *)
-      echo $"unknown talos_image_builder $talos_image_builder"
-      exit 1
-      ;;
-  esac
   echo "converting image to the qcow2 format..."
   local talos_libvirt_base_volume_name="talos-$talos_version.qcow2"
   qemu-img convert -O qcow2 tmp/talos/nocloud-amd64.raw tmp/talos/$talos_libvirt_base_volume_name

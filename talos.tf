@@ -16,75 +16,68 @@ locals {
   ]
   kube_prism_port = 7445
   common_machine_configs = [
+    // see https://docs.siderolabs.com/kubernetes-guides/advanced-guides/kubeprism
+    // see https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/system-configuration/kubeprism
+    // see https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubeprismconfig
+    // see talosctl -n $c0 read /etc/kubernetes/kubeconfig-kubelet | yq .clusters[].cluster.server
+    // NB if you use a non-default CNI, you must configure it to use the
+    //      https://localhost:7445 kube-apiserver endpoint.
     {
-      machine = {
-        # NB the install section changes are only applied after a talos upgrade
-        #    (which we do not do). instead, its preferred to create a custom
-        #    talos image, which is created in the installed state.
-        #install = {}
-        features = {
-          # see https://docs.siderolabs.com/kubernetes-guides/advanced-guides/kubeprism
-          # see talosctl -n $c0 read /etc/kubernetes/kubeconfig-kubelet | yq .clusters[].cluster.server
-          # NB if you use a non-default CNI, you must configure it to use the
-          #    https://localhost:7445 kube-apiserver endpoint.
-          kubePrism = {
-            enabled = true
-            port    = local.kube_prism_port
-          }
-          # see https://docs.siderolabs.com/talos/v1.13/networking/host-dns
-          hostDNS = {
-            enabled              = true
-            forwardKubeDNSToHost = true
-          }
-        }
-        kernel = {
-          modules = [
-            // piraeus dependencies.
-            {
-              name = "drbd"
-              parameters = [
-                "usermode_helper=disabled",
-              ]
-            },
-            {
-              name = "drbd_transport_tcp"
-            },
-          ]
-        }
-      }
-      cluster = {
-        # disable kubernetes discovery as its no longer compatible with k8s 1.32+.
-        # NB we actually disable the discovery altogether, at the other discovery
-        #    mechanism, service discovery, requires the public discovery service
-        #    from https://discovery.talos.dev/ (or a custom and paid one running
-        #    locally in your network).
-        # NB without this, talosctl get members, always returns an empty set.
-        # see https://docs.siderolabs.com/talos/v1.13/configure-your-talos-cluster/system-configuration/discovery
-        # see https://docs.siderolabs.com/talos/v1.13/reference/configuration/v1alpha1/config#discovery
-        # see https://github.com/siderolabs/talos/issues/9980
-        # see https://github.com/siderolabs/talos/commit/c12b52491456d1e52204eb290d0686a317358c7c
-        discovery = {
-          enabled = false
-          registries = {
-            kubernetes = {
-              disabled = true
-            }
-            service = {
-              disabled = true
-            }
-          }
-        }
-        network = {
-          cni = {
-            name = "none"
-          }
-        }
-        proxy = {
-          disabled = true
-        }
+      apiVersion = "v1alpha1"
+      kind       = "KubePrismConfig"
+      port       = local.kube_prism_port
+    },
+    // disable kubernetes discovery as its no longer compatible with k8s 1.32+.
+    // NB we actually disable the discovery altogether, at the other discovery
+    //    mechanism, service discovery, requires the public discovery service
+    //    from https://discovery.talos.dev/ (or a custom and paid one running
+    //    locally in your network).
+    // NB without this, talosctl get members, always returns an empty set.
+    // see https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/system-configuration/discovery
+    // see https://github.com/siderolabs/talos/issues/9980
+    // see https://github.com/siderolabs/talos/commit/c12b52491456d1e52204eb290d0686a317358c7c
+    {
+      apiVersion = "v1alpha1"
+      kind       = "DiscoveryServiceConfig"
+      "$patch"   = "delete"
+    },
+    // add the piraeus kernel module dependencies.
+    // see https://docs.siderolabs.com/talos/v1.14/reference/configuration/runtime/kernelmoduleconfig
+    {
+      apiVersion = "v1alpha1"
+      kind       = "KernelModuleConfig"
+      name       = "drbd"
+      parameters = [
+        "usermode_helper=disabled",
+      ]
+    },
+    {
+      apiVersion = "v1alpha1"
+      kind       = "KernelModuleConfig"
+      name       = "drbd_transport_tcp"
+    },
+    // disable the default Talos Flannel CNI (we are using Cilium instead).
+    // NB this is used in tandem with the control plane configuration, which also disables kube-proxy.
+    // see https://docs.siderolabs.com/kubernetes-guides/cni/deploying-cilium#without-kube-proxy
+    // see https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubeflannelcniconfig
+    // see https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubeproxyconfig
+    {
+      apiVersion = "v1alpha1"
+      kind       = "KubeFlannelCNIConfig"
+      "$patch"   = "delete"
+    },
+    // disable forwardKubeDNSToHost as its incompatible with Cilium.
+    // see https://docs.siderolabs.com/talos/v1.14/networking/host-dns
+    // see https://docs.siderolabs.com/talos/v1.14/reference/configuration/network/resolverconfig
+    {
+      apiVersion = "v1alpha1"
+      kind       = "ResolverConfig"
+      hostDNS = {
+        enabled              = true
+        forwardKubeDNSToHost = false
       }
     },
-    // see https://docs.siderolabs.com/talos/v1.13/reference/configuration/network/statichostconfig
+    // see https://docs.siderolabs.com/talos/v1.14/reference/configuration/network/statichostconfig
     // see talosctl -n $c0 read /etc/hosts
     {
       apiVersion = "v1alpha1"
@@ -94,7 +87,7 @@ locals {
         local.zot_cluster_domain,
       ]
     },
-    // see https://docs.siderolabs.com/talos/v1.13/reference/configuration/cri/registryauthconfig
+    // see https://docs.siderolabs.com/talos/v1.14/reference/configuration/cri/registryauthconfig
     // see talosctl -n $c0 read /etc/cri/conf.d/cri.toml
     {
       apiVersion = "v1alpha1"
@@ -103,7 +96,7 @@ locals {
       username   = "talos"
       password   = "talos"
     },
-    // see https://docs.siderolabs.com/talos/v1.13/reference/configuration/cri/registrymirrorconfig
+    // see https://docs.siderolabs.com/talos/v1.14/reference/configuration/cri/registrymirrorconfig
     // see talosctl -n $c0 read /etc/cri/conf.d/hosts/zot.zot.svc.cluster.local_5000_/hosts.toml
     {
       apiVersion   = "v1alpha1"
@@ -133,8 +126,18 @@ data "talos_machine_configuration" "controller" {
   config_patches = concat(
     [for c in local.common_machine_configs : yamlencode(c)],
     [
-      // see https://docs.siderolabs.com/talos/v1.13/networking/advanced/vip
-      // see https://docs.siderolabs.com/talos/v1.13/reference/configuration/network/layer2vipconfig
+      // disable kube-proxy (we are using Cilium instead).
+      // NB this is used in tandem with the common_machine_configs above, which also disables the flannel CNI.
+      // see https://docs.siderolabs.com/kubernetes-guides/cni/deploying-cilium#without-kube-proxy
+      // see https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubeflannelcniconfig
+      // see https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubeproxyconfig
+      yamlencode({
+        apiVersion = "v1alpha1"
+        kind       = "KubeProxyConfig"
+        enabled    = false
+      }),
+      // see https://docs.siderolabs.com/talos/v1.14/networking/advanced/vip
+      // see https://docs.siderolabs.com/talos/v1.14/reference/configuration/network/layer2vipconfig
       yamlencode({
         apiVersion = "v1alpha1"
         kind       = "Layer2VIPConfig"
@@ -142,72 +145,83 @@ data "talos_machine_configuration" "controller" {
         name       = var.cluster_vip
       }),
       yamlencode({
-        cluster = {
-          inlineManifests = [
-            {
-              name     = "spin"
-              contents = <<-EOF
-                apiVersion: node.k8s.io/v1
-                kind: RuntimeClass
-                metadata:
-                  name: wasmtime-spin-v2
-                handler: spin
-                EOF
-            },
-            {
-              name = "cilium"
-              contents = join("---\n", [
-                data.helm_template.cilium.manifest,
-                "# Source cilium.tf\n${local.cilium_external_lb_manifest}",
-              ])
-            },
-            {
+        apiVersion = "v1alpha1"
+        kind       = "KubeInlineManifestConfig"
+        name       = "spin"
+        manifest   = <<-EOF
+          apiVersion: node.k8s.io/v1
+          kind: RuntimeClass
+          metadata:
+            name: wasmtime-spin-v2
+          handler: spin
+          EOF
+      }),
+      yamlencode({
+        apiVersion = "v1alpha1"
+        kind       = "KubeInlineManifestConfig"
+        name       = "cilium"
+        manifest = join("---\n", [
+          data.helm_template.cilium.manifest,
+          "# Source cilium.tf\n${local.cilium_external_lb_manifest}",
+        ])
+      }),
+      yamlencode({
+        apiVersion = "v1alpha1"
+        kind       = "KubeInlineManifestConfig"
+        name       = "cert-manager"
+        manifest = join("---\n", [
+          yamlencode({
+            apiVersion = "v1"
+            kind       = "Namespace"
+            metadata = {
               name = "cert-manager"
-              contents = join("---\n", [
-                yamlencode({
-                  apiVersion = "v1"
-                  kind       = "Namespace"
-                  metadata = {
-                    name = "cert-manager"
-                  }
-                }),
-                data.helm_template.cert_manager.manifest,
-                "# Source cert-manager.tf\n${local.cert_manager_ingress_ca_manifest}",
-              ])
-            },
-            {
-              name     = "trust-manager"
-              contents = data.helm_template.trust_manager.manifest
-            },
-            {
-              name     = "reloader"
-              contents = data.helm_template.reloader.manifest
-            },
-            {
-              name     = "zot"
-              contents = local.zot_manifest
-            },
-            {
-              name     = "gitea"
-              contents = local.gitea_manifest
-            },
-            {
-              name = "argocd"
-              contents = join("---\n", [
-                yamlencode({
-                  apiVersion = "v1"
-                  kind       = "Namespace"
-                  metadata = {
-                    name = local.argocd_namespace
-                  }
-                }),
-                data.helm_template.argocd.manifest,
-                "# Source argocd.tf\n${local.argocd_manifest}",
-              ])
-            },
-          ],
-        },
-    })],
+            }
+          }),
+          data.helm_template.cert_manager.manifest,
+          "# Source cert-manager.tf\n${local.cert_manager_ingress_ca_manifest}",
+        ])
+      }),
+      yamlencode({
+        apiVersion = "v1alpha1"
+        kind       = "KubeInlineManifestConfig"
+        name       = "trust-manager"
+        manifest   = data.helm_template.trust_manager.manifest
+      }),
+      yamlencode({
+        apiVersion = "v1alpha1"
+        kind       = "KubeInlineManifestConfig"
+        name       = "reloader"
+        manifest   = data.helm_template.reloader.manifest
+      }),
+      yamlencode({
+        apiVersion = "v1alpha1"
+        kind       = "KubeInlineManifestConfig"
+        name       = "zot"
+        manifest   = local.zot_manifest
+      }),
+      yamlencode({
+        apiVersion = "v1alpha1"
+        kind       = "KubeInlineManifestConfig"
+        name       = "gitea"
+        manifest   = local.gitea_manifest
+      }),
+      yamlencode({
+        apiVersion = "v1alpha1"
+        kind       = "KubeInlineManifestConfig"
+        name       = "argocd"
+        manifest = join("---\n", [
+          yamlencode({
+            apiVersion = "v1"
+            kind       = "Namespace"
+            metadata = {
+              name = local.argocd_namespace
+            }
+          }),
+          data.helm_template.argocd.manifest,
+          "# Source argocd.tf\n${local.argocd_manifest}",
+        ])
+      }),
+    ],
   )
 }
 
@@ -249,7 +263,7 @@ resource "talos_machine_configuration_apply" "controller" {
   endpoint                    = local.controller_nodes[count.index].address
   node                        = local.controller_nodes[count.index].address
   config_patches = [
-    # see https://docs.siderolabs.com/talos/v1.13/reference/configuration/network/hostnameconfig
+    # see https://docs.siderolabs.com/talos/v1.14/reference/configuration/network/hostnameconfig
     yamlencode({
       apiVersion = "v1alpha1"
       kind       = "HostnameConfig"
@@ -270,7 +284,7 @@ resource "talos_machine_configuration_apply" "worker" {
   endpoint                    = local.worker_nodes[count.index].address
   node                        = local.worker_nodes[count.index].address
   config_patches = [
-    # see https://docs.siderolabs.com/talos/v1.13/reference/configuration/network/hostnameconfig
+    # see https://docs.siderolabs.com/talos/v1.14/reference/configuration/network/hostnameconfig
     yamlencode({
       apiVersion = "v1alpha1"
       kind       = "HostnameConfig"

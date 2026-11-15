@@ -2,7 +2,7 @@
 
 [![Lint](https://github.com/rgl/terraform-libvirt-talos/actions/workflows/lint.yml/badge.svg)](https://github.com/rgl/terraform-libvirt-talos/actions/workflows/lint.yml)
 
-An example [Talos Linux](https://www.talos.dev) Kubernetes cluster in libvirt QEMU/KVM Virtual Machines using terraform.
+An example [Talos Linux](https://www.siderolabs.com/talos-linux) Kubernetes cluster in libvirt QEMU/KVM Virtual Machines using terraform.
 
 [Cilium](https://cilium.io) is used to augment the Networking (e.g. the [`LoadBalancer`](https://cilium.io/use-cases/load-balancer/) and [`Ingress`](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) controllers), Observability (e.g. [Service Map](https://cilium.io/use-cases/service-map/)), and Security (e.g. [Network Policy](https://cilium.io/use-cases/network-policy/)).
 
@@ -89,7 +89,7 @@ Install talosctl:
 ```bash
 # see https://github.com/siderolabs/talos/releases
 # renovate: datasource=github-releases depName=siderolabs/talos
-talos_version='1.13.12'
+talos_version='1.14.6'
 wget https://github.com/siderolabs/talos/releases/download/v$talos_version/talosctl-linux-amd64
 sudo install talosctl-linux-amd64 /usr/local/bin/talosctl
 rm talosctl-linux-amd64
@@ -501,19 +501,13 @@ List this repository dependencies (and which have newer versions):
 GITHUB_COM_TOKEN='YOUR_GITHUB_PERSONAL_TOKEN' ./renovate.sh
 ```
 
-Update the talos extensions to match the talos version:
-
-```bash
-./do update-talos-extensions
-```
-
 # Troubleshoot
 
 Talos:
 
 ```bash
-# see https://docs.siderolabs.com/talos/v1.13/troubleshooting/troubleshooting
-# see https://docs.siderolabs.com/talos/v1.13/troubleshooting/talosctl-debug
+# see https://docs.siderolabs.com/talos/v1.14/troubleshooting/troubleshooting
+# see https://docs.siderolabs.com/talos/v1.14/troubleshooting/talosctl-debug
 talosctl -n $all support && rm -rf support && 7z x -osupport support.zip && code support
 talosctl -n $c0 debug docker.io/library/alpine:3.23
 talosctl -n $c0 service ext-qemu-guest-agent status
@@ -531,6 +525,7 @@ talosctl -n $c0 dashboard
 talosctl -n $c0 logs kernel
 talosctl -n $c0 logs controller-runtime
 talosctl -n $c0 logs kubelet
+talosctl -n $c0 logs dns-resolve-cache
 talosctl -n $c0 mounts | sort
 talosctl -n $c0 get blockdevices
 talosctl -n $c0 get disks
@@ -544,6 +539,7 @@ talosctl -n $c0 get services
 talosctl -n $c0 get extensions
 talosctl -n $c0 get addresses
 talosctl -n $c0 get nodeaddresses
+talosctl -n $c0 get resolvers
 talosctl -n $c0 netstat --extend --programs --pods --listening
 talosctl -n $c0 list -l -r -t f /etc
 talosctl -n $c0 list -l -r -t f /system
@@ -573,6 +569,8 @@ Cilium:
 ```bash
 cilium status --wait
 kubectl -n kube-system exec ds/cilium -- cilium-dbg status --verbose
+kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all
+kubectl -n kube-system get configmap cilium-config -o yaml
 cilium config view
 cilium hubble ui
 # **NB** cilium connectivity test is not working out-of-the-box in the default
@@ -591,6 +589,8 @@ kubectl --namespace kube-system debug node/w0 --stdin --tty --image=busybox:1.38
 kubectl --namespace kube-system get configmaps coredns --output yaml
 pod_name="$(kubectl --namespace kube-system get pods --selector k8s-app=kube-dns --output json | jq -r '.items[0].metadata.name')"
 kubectl --namespace kube-system debug $pod_name --stdin --tty --image=busybox:1.38 --target=coredns -- sh -c 'cat /proc/$(pgrep coredns)/root/etc/resolv.conf'
+kubectl --namespace kube-system debug $pod_name --stdin --tty --image=busybox:1.38 --target=coredns -- sh -c 'cat /etc/resolv.conf'
+kubectl --namespace kube-system run busybox -it --rm --restart=Never --image=busybox:1.38 -- cat /etc/resolv.conf
 kubectl --namespace kube-system run busybox -it --rm --restart=Never --image=busybox:1.38 -- nslookup -type=a talos.dev
 kubectl get crds
 kubectl api-resources

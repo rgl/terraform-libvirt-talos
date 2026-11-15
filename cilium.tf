@@ -44,7 +44,8 @@ locals {
   cilium_external_lb_manifest = join("---\n", [for d in local.cilium_external_lb_manifests : yamlencode(d)])
 }
 
-// see https://docs.siderolabs.com/kubernetes-guides/cni/deploying-cilium#method-4%3A-helm-manifests-inline-install
+// see https://docs.siderolabs.com/kubernetes-guides/cni/deploying-cilium#without-kube-proxy-4
+// see https://docs.cilium.io/en/stable/installation/k8s-install-talos-linux/
 // see https://docs.cilium.io/en/stable/network/servicemesh/ingress/
 // see https://docs.cilium.io/en/stable/gettingstarted/hubble_setup/
 // see https://docs.cilium.io/en/stable/gettingstarted/hubble/
